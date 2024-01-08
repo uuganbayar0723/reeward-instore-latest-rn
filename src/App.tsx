@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {store} from './store';
 import {Provider, useDispatch} from 'react-redux';
@@ -30,6 +31,16 @@ function App(): React.JSX.Element {
 
 function AppNavigator(): React.JSX.Element {
   const token = useAppSelector(state => state.auth.token);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    (async () => {
+      const tokenStorage = await AsyncStorage.getItem('token');
+      if (tokenStorage) {
+        dispatch(setToken(tokenStorage));
+      }
+    })();
+  }, []);
 
   return (
     <NavigationContainer>
@@ -52,7 +63,6 @@ function HomeScreen(): React.JSX.Element {
   const count = useAppSelector(state => state.auth.token);
   const dispatch = useAppDispatch();
 
-  //
   return (
     <View className="bg-red-100">
       <Text>Home Screen</Text>
@@ -75,10 +85,11 @@ function LoginScreen(): React.JSX.Element {
   }
 
   useEffect(() => {
-    console.log({response})
     if (response.isSuccess) {
       const {data} = response.data;
-      dispatch(setToken(data.token));
+      const {token} = data;
+      AsyncStorage.setItem('token', token);
+      dispatch(setToken(token));
     }
   }, [response]);
 
