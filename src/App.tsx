@@ -18,6 +18,8 @@ import Orders from '@screens/Orders';
 import Notification from '@screens/Notification';
 import Settings from '@screens/Settings';
 import Login from '@screens/auth/Login';
+import {StorageKeys, storeGetItem, storeGetObj} from '@utils/asyncStorage';
+import {setUser} from '@store/slices/user';
 
 const MainTab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -36,20 +38,27 @@ function AppNavigator(): React.JSX.Element {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    (async () => {
-      const tokenStorage = await AsyncStorage.getItem('token');
-      if (tokenStorage) {
-        dispatch(setToken(tokenStorage));
-      }
-    })();
+    init();
   }, []);
+
+  async function init() {
+    const tokenStorage = await storeGetItem(StorageKeys.Token);
+    if (tokenStorage) {
+      dispatch(setToken(tokenStorage));
+    }
+    const userStorage = await storeGetObj(StorageKeys.User);
+
+    if (tokenStorage) {
+      dispatch(setUser(userStorage));
+    }
+  }
 
   return (
     <NavigationContainer>
       {token ? (
         <MainNavigator />
       ) : (
-        <AuthStack.Navigator>
+        <AuthStack.Navigator screenOptions={{headerShown: false}}>
           <AuthStack.Screen name="Login" component={Login} />
         </AuthStack.Navigator>
       )}
@@ -59,9 +68,10 @@ function AppNavigator(): React.JSX.Element {
 
 function MainNavigator(): React.JSX.Element {
   return (
-    <MainTab.Navigator screenOptions={{
-      headerShown: false
-    }}>
+    <MainTab.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <MainTab.Screen name="Home" component={Home} />
       <MainTab.Screen name="NewSale" component={NewSale} />
       <MainTab.Screen name="Orders" component={Orders} />

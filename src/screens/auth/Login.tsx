@@ -11,8 +11,10 @@ import {
 import {useDispatch} from 'react-redux';
 import {useLoginMutation} from '@store/services/api';
 import {setToken} from '@store/slices/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
+import AppButton from '@components/AppButton';
+import {setUser} from '@store/slices/user';
+import {storeObj, storeItem, StorageKeys} from '@utils/asyncStorage';
 
 function Login(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -29,9 +31,27 @@ function Login(): React.JSX.Element {
   useEffect(() => {
     if (response.isSuccess) {
       const {data} = response.data;
-      const {token} = data;
-      AsyncStorage.setItem('token', token);
+      const {token, user} = data;
+      const {email, firstname, lastname, name, role, language, merchant} = user;
+      const {_id: merchantId, name: merchantName} = merchant;
+      const userFormatted = {
+        merchantId,
+        // email,
+        // firstname,
+        // lastname,
+        // name,
+        // role,
+        // language,
+        // merchant: {
+        //   id: merchantId,
+        //   name: merchantName,
+        // },
+      };
+
+      storeItem({key: StorageKeys.Token, value: token});
+      storeObj({key: StorageKeys.User, value: userFormatted});
       dispatch(setToken(token));
+      dispatch(setUser(userFormatted));
 
       Toast.show({
         type: 'success',
@@ -66,11 +86,7 @@ function Login(): React.JSX.Element {
             onChangeText={setPassword}
             value={password}
           />
-          <TouchableOpacity
-            onPress={handleLogin}
-            className="rounded-md py-3 w-full justify-center items-center bg-black">
-            <Text className="text-white">Login</Text>
-          </TouchableOpacity>
+          <AppButton text="Login" onPress={handleLogin} />
         </View>
       </View>
     </KeyboardAvoidingView>

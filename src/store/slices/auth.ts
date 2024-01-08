@@ -1,11 +1,11 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 
-export interface AuthState {
+export interface AuthInterface {
   token: string;
 }
 
-const initialState: AuthState = {
+const initialState: AuthInterface = {
   token: '',
 };
 
