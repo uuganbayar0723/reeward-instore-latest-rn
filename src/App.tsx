@@ -11,12 +11,14 @@ import {
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
 
 import {store} from './store';
 import {Provider, useDispatch} from 'react-redux';
 import {useAppDispatch, useAppSelector} from './store';
 import {useLoginMutation} from './store/services/api';
 import {setToken} from './store/slices/auth';
+import {toastConfig} from './configs/toastConfig';
 
 const AppStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -25,6 +27,7 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
       <AppNavigator />
+      <Toast config={toastConfig} topOffset={10} visibilityTime={2000} />
     </Provider>
   );
 }
@@ -63,11 +66,14 @@ function HomeScreen(): React.JSX.Element {
   const count = useAppSelector(state => state.auth.token);
   const dispatch = useAppDispatch();
 
+  function logout() {
+    dispatch(setToken(''));
+  }
+
   return (
     <View className="bg-red-100">
       <Text>Home Screen</Text>
-      <Button title="Countup" />
-      <Button title="Login" />
+      <Button title="Logout Temp" onPress={logout} />
     </View>
   );
 }
@@ -90,6 +96,19 @@ function LoginScreen(): React.JSX.Element {
       const {token} = data;
       AsyncStorage.setItem('token', token);
       dispatch(setToken(token));
+
+      Toast.show({
+        type: 'success',
+        text1: 'Login Success',
+        text2: `Hello ${data.user.name}`,
+      });
+    }
+    if (response.isError) {
+      Toast.show({
+        type: 'error',
+        text1: 'Login error',
+        text2: `error`,
+      });
     }
   }, [response]);
 
