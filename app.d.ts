@@ -1,6 +1,9 @@
 /// <reference types="nativewind/types" />
 type RootStackParamList = {
   Home: undefined;
+};
+
+type AuthStackParamList = {
   Login: undefined;
 };
 
