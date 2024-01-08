@@ -59,11 +59,13 @@ function AppNavigator(): React.JSX.Element {
 
 function MainNavigator(): React.JSX.Element {
   return (
-    <MainTab.Navigator>
+    <MainTab.Navigator screenOptions={{
+      headerShown: false
+    }}>
       <MainTab.Screen name="Home" component={Home} />
       <MainTab.Screen name="NewSale" component={NewSale} />
       <MainTab.Screen name="Orders" component={Orders} />
-      <MainTab.Screen name="Notification" component={Notification} />
+      {/* <MainTab.Screen name="Notification" component={Notification} /> */}
       <MainTab.Screen name="Settings" component={Settings} />
     </MainTab.Navigator>
   );
