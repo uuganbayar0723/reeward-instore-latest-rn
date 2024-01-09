@@ -29,6 +29,7 @@ export const apiSlice = createApi({
         url: `https://order.reeward.app/api/menu`,
         params,
       }),
+      transformResponse: (res: {data: any}) => res.data
     }),
   }),
 });
