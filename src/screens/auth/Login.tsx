@@ -14,7 +14,7 @@ import {setToken} from '@store/slices/auth';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
 import AppButton from '@components/AppButton';
 import {setUser} from '@store/slices/user';
-import {storeObj, storeItem, StorageKeys} from '@utils/asyncStorage';
+import {storeSetItem, storeSetObj, StorageKeys} from '@utils/asyncStorage';
 
 function Login(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -32,10 +32,10 @@ function Login(): React.JSX.Element {
     if (response.isSuccess) {
       const {data} = response.data;
       const {token, user} = data;
-      const {email, firstname, lastname, name, role, language, merchant} = user;
-      const {_id: merchantId, name: merchantName} = merchant;
+      const {email, firstname, lastname, name, role, language, outlet} = user;
+      const {_id: outletId} = outlet;
       const userFormatted = {
-        merchantId,
+        outletId,
         // email,
         // firstname,
         // lastname,
@@ -48,8 +48,8 @@ function Login(): React.JSX.Element {
         // },
       };
 
-      storeItem({key: StorageKeys.Token, value: token});
-      storeObj({key: StorageKeys.User, value: userFormatted});
+      storeSetItem({key: StorageKeys.Token, value: token});
+      storeSetObj({key: StorageKeys.User, value: userFormatted});
       dispatch(setToken(token));
       dispatch(setUser(userFormatted));
 

@@ -14,7 +14,7 @@ export interface UserInterface {
   //   role: string;
   //   language: string;
   //   merchant: Merchant;
-  merchantId: string;
+  outletId: string;
 }
 
 interface InitUser {

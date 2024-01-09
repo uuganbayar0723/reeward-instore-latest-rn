@@ -3,7 +3,8 @@ import { UserInterface } from '@store/slices/user';
 
 export enum StorageKeys {
     Token = 'token',
-    User = 'user'
+    User = 'user',
+    Host = 'host',
 }
 
 interface StoreItemInterface {
@@ -16,13 +17,13 @@ interface StoreObjInterface {
   value: UserInterface;
 }
 
-export const storeItem = async ({key, value}: StoreItemInterface) => {
+export const storeSetItem = async ({key, value}: StoreItemInterface) => {
   try {
     await AsyncStorage.setItem(key, value);
   } catch (e) {}
 };
 
-export const storeObj = async ({key, value}: StoreObjInterface) => {
+export const storeSetObj = async ({key, value}: StoreObjInterface) => {
   try {
     const jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(key, jsonValue);
