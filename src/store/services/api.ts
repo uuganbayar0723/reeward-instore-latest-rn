@@ -1,5 +1,6 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {RootState} from '..';
+import {formatMenu} from '@utils/formatResponse';
 
 interface LoginBody {
   email: string;
@@ -29,7 +30,8 @@ export const apiSlice = createApi({
         url: `https://order.reeward.app/api/menu`,
         params,
       }),
-      transformResponse: (res: {data: any}) => res.data
+      // transformResponse: (res: {data: any}) => res.data
+      transformResponse: formatMenu,
     }),
   }),
 });

@@ -22,6 +22,7 @@ module.exports = {
           '@components': './src/components',
           '@store': './src/store',
           '@utils': './src/utils',
+          '@constants': './src/constants',
         },
       },
     ],

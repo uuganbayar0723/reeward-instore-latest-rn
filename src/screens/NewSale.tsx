@@ -14,72 +14,55 @@ import AppButton from '@components/AppButton';
 import {useAppSelector} from '@store/index';
 import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
+import colors from '@constants/colors';
 
 const IMAGE_SIZE = 110;
 
 function NewSale(): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
-  let {data, isLoading, isFetching, error} = useGetMenuQuery({
+  let {
+    data: categories,
+    isLoading,
+    isFetching,
+    error,
+  } = useGetMenuQuery({
     outletId: user?.outletId,
   });
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [products, setProducts] = useState<any>([]);
 
-  let formattedData = data?.category_list
-    .filter((c: any) => c._id && c.name && c.product_list.length)
-    .map((c: any) => {
-      return {
-        name: c.name.en_US,
-        id: c._id,
-        product_list: c.product_list.map((p: any) => ({
-          categoryId: c._id,
-          name: p.name.en_US,
-          price: p.price,
-          id: p._id,
-          image_url: p.image_url || '',
-          productType: p.productType,
-          modifier_list: p.modifier_list,
-          remaining_quantity: p.remaing_quantity,
-          color: p.color,
-        })),
-      };
-    });
-
-  let productsFormatted = formattedData?.reduce(
-    (result: any, obj: any) => [...result, ...obj.product_list],
-    [],
-  );
-
   useEffect(() => {
-    if (products.length === 0 && productsFormatted) {
-      const filtered = productsFormatted.filter(
-        (p: any) => p.categoryId === activeCategoryId,
-      );
+    if (products.length === 0 && categories) {
+      const activeCategory = categories.filter(
+        (c: any) => c.id === activeCategoryId,
+      )[0];
 
-      setProducts(filtered);
+      const product_list = activeCategory?.product_list || [];
+
+      setProducts(product_list);
     }
   }, [activeCategoryId, products]);
 
   useEffect(() => {
-    if (formattedData) {
-      setActiveCategoryId(formattedData[0].id);
+    if (categories) {
+      setActiveCategoryId(categories[0].id);
     }
-  }, [data]);
+  }, [categories]);
 
   return (
-    <View>
+    <View className="flex-1">
       {isLoading ? (
         <View className="flex-1 justify-center">
-          <ActivityIndicator />
+          <ActivityIndicator color={colors.primary} />
         </View>
       ) : (
-        <View className="pb-28">
+        <View>
           <ScrollView
             className="px-4"
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
-            {formattedData.map((c: any, index: string) => (
+            {categories.map((c: any, index: string) => (
               <View key={c.id} className="my-2 mr-4">
                 <AppButton
                   isDisabled={activeCategoryId !== c.id}
@@ -94,6 +77,7 @@ function NewSale(): React.JSX.Element {
             ))}
           </ScrollView>
           <FlatList
+            className="mb-14"
             data={products}
             keyExtractor={item => item.id}
             initialNumToRender={1}
@@ -107,7 +91,7 @@ function NewSale(): React.JSX.Element {
                 p={p}
               />
             )}
-            ListEmptyComponent={<ActivityIndicator className='h-44' />}
+            ListEmptyComponent={<ActivityIndicator className="h-44" />}
           />
         </View>
       )}
