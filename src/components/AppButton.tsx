@@ -30,7 +30,7 @@ function AppButton({
         } h-10 px-4 rounded-md justify-center items-center ${props.className}`}
         // colors={isDisabled ? ['#F3F3F3', '#F3F3F3'] : ['#FD6A6A', '#ED4892']}
         colors={['#FD6A6A', '#ED4892']}>
-        <AppText text={text} className="text-white text-center font-bold" />
+        <AppText className="text-white text-center font-bold">{text}</AppText>
       </LinearGradient>
     </TouchableOpacity>
   );

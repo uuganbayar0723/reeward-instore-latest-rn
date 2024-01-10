@@ -15,6 +15,8 @@ import {useAppSelector} from '@store/index';
 import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
 import colors from '@constants/colors';
+import {useNavigation} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const IMAGE_SIZE = 110;
 
@@ -91,7 +93,9 @@ function NewSale(): React.JSX.Element {
                 p={p}
               />
             )}
-            ListEmptyComponent={<ActivityIndicator className="h-44" />}
+            ListEmptyComponent={
+              <ActivityIndicator color={colors.primary} className="h-44" />
+            }
           />
         </View>
       )}
@@ -99,30 +103,18 @@ function NewSale(): React.JSX.Element {
   );
 }
 
-function EmptyProduct() {
-  return (
-    <View className="w-full flex-row flex-wrap">
-      <View className="w-1/2 p-2">
-        <View className="bg-gray-200 h-56 rounded-xl"></View>
-      </View>
-      <View className="w-1/2 p-2">
-        <View className="bg-gray-200 h-56 rounded-xl"></View>
-      </View>
-      <View className="w-1/2 p-2">
-        <View className="bg-gray-200 h-56 rounded-xl"></View>
-      </View>
-      <View className="w-1/2 p-2">
-        <View className="bg-gray-200 h-56 rounded-xl"></View>
-      </View>
-    </View>
-  );
-}
-
 const Product = memo(
   ({name, price, image_url}: any) => {
+    const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
     return (
       <View className="w-1/2 p-2">
-        <TouchableOpacity activeOpacity={0.8} className="relative">
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('ProductDetail', undefined);
+          }}
+          activeOpacity={0.8}
+          className="relative">
           {image_url && (
             <View
               style={{

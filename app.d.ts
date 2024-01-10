@@ -11,6 +11,11 @@ type AuthStackParamList = {
   Login: undefined;
 };
 
+type MainStackParamList = {
+  MainTab: undefined
+  ProductDetail: undefined
+};
+
 namespace ReactNavigation {
   interface RootParamList extends RootStackParamList {}
 }

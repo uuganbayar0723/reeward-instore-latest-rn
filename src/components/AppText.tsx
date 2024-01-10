@@ -2,20 +2,18 @@ import React from 'react';
 import {View, Text, TextProps} from 'react-native';
 
 interface AppTextProps extends TextProps {
-  text: string;
   containerClassName?: string;
   className?: string;
 }
 
 function AppText({
-  text,
   containerClassName,
   className,
-  ...prop
+  ...props
 }: AppTextProps): React.JSX.Element {
   return (
     <View className={containerClassName}>
-      <Text {...prop}>{text}</Text>
+      <Text {...props} />
     </View>
   );
 }
