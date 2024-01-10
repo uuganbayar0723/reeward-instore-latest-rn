@@ -18,21 +18,28 @@ import colors from '@constants/colors';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigators/MainNavigator';
+import LoadingView from '@components/LoadingView';
 
 const IMAGE_SIZE = 110;
 
 function NewSale(): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
-  let {data, isLoading, isSuccess, isFetching, error} = useGetMenuQuery({
+  let {
+    data: menu,
+    isLoading,
+    isSuccess,
+    isFetching,
+    error,
+  } = useGetMenuQuery({
     outletId: user?.outletId,
   });
 
   let categories: any;
   let allProductsHash: any;
 
-  if (data) {
-    categories = data.categories;
-    allProductsHash = data.allProductsHash;
+  if (menu) {
+    categories = menu.categories;
+    allProductsHash = menu.allProductsHash;
   }
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
@@ -60,7 +67,7 @@ function NewSale(): React.JSX.Element {
     <View className="flex-1">
       {isLoading || !isSuccess ? (
         <View className="flex-1 justify-center">
-          <ActivityIndicator color={colors.primary} />
+          <LoadingView />
         </View>
       ) : (
         <View>
