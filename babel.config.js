@@ -23,6 +23,7 @@ module.exports = {
           '@store': './src/store',
           '@utils': './src/utils',
           '@constants': './src/constants',
+          '@navigators': './src/navigators',
         },
       },
     ],

@@ -1,5 +1,5 @@
 export function formatMenu(res: any) {
-  return res.data.category_list
+  const categories = res.data.category_list
     .filter((c: any) => c._id && c.name && c.product_list.length)
     .map((c: any) => {
       return {
@@ -18,4 +18,20 @@ export function formatMenu(res: any) {
         })),
       };
     });
+
+  const allProducts:any = categories.reduce((result: any, current: any) => {
+    return result.concat(current.product_list);
+  }, []);
+
+  const allProductsHash :any = {};
+  for (let i in allProducts) {
+    allProductsHash[allProducts[i].id] = allProducts[i];
+  }
+
+  let result: any = {};
+
+  result.categories = categories;
+  result.allProductsHash = allProductsHash;
+
+  return result;
 }

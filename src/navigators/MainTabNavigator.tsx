@@ -4,6 +4,14 @@ import NewSale from "@screens/NewSale";
 import Orders from "@screens/Orders";
 import Settings from "@screens/Settings";
 
+type MainTabParamList = {
+  Home: undefined;
+  NewSale: undefined;
+  Orders: undefined;
+  Notification: undefined;
+  Settings: undefined;
+};
+
 const MainTab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator(): React.JSX.Element {

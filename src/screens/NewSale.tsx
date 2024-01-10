@@ -16,20 +16,24 @@ import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
 import colors from '@constants/colors';
 import {useNavigation} from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {MainStackParamList} from '@navigators/MainNavigator';
 
 const IMAGE_SIZE = 110;
 
 function NewSale(): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
-  let {
-    data: categories,
-    isLoading,
-    isFetching,
-    error,
-  } = useGetMenuQuery({
+  let {data, isLoading, isSuccess, isFetching, error} = useGetMenuQuery({
     outletId: user?.outletId,
   });
+
+  let categories: any;
+  let allProductsHash: any;
+
+  if (data) {
+    categories = data.categories;
+    allProductsHash = data.allProductsHash;
+  }
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [products, setProducts] = useState<any>([]);
@@ -54,7 +58,7 @@ function NewSale(): React.JSX.Element {
 
   return (
     <View className="flex-1">
-      {isLoading ? (
+      {isLoading || !isSuccess ? (
         <View className="flex-1 justify-center">
           <ActivityIndicator color={colors.primary} />
         </View>
@@ -85,14 +89,7 @@ function NewSale(): React.JSX.Element {
             initialNumToRender={1}
             maxToRenderPerBatch={1}
             numColumns={2}
-            renderItem={({item: p, index}) => (
-              <Product
-                name={p.name}
-                price={p.price.dine_in}
-                image_url={p.image_url}
-                p={p}
-              />
-            )}
+            renderItem={({item: p, index}) => <Product p={p} />}
             ListEmptyComponent={
               <ActivityIndicator color={colors.primary} className="h-44" />
             }
@@ -104,18 +101,19 @@ function NewSale(): React.JSX.Element {
 }
 
 const Product = memo(
-  ({name, price, image_url}: any) => {
-    const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  ({p}: any) => {
+    const navigation =
+      useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
     return (
       <View className="w-1/2 p-2">
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('ProductDetail', undefined);
+            navigation.navigate('ProductDetail', {id: p.id});
           }}
           activeOpacity={0.8}
           className="relative">
-          {image_url && (
+          {p.image_url && (
             <View
               style={{
                 transform: [{translateX: -(IMAGE_SIZE / 2)}],
@@ -128,7 +126,7 @@ const Product = memo(
                   height: IMAGE_SIZE,
                 }}
                 className="rounded-full "
-                source={{uri: image_url}}
+                source={{uri: p.image_url}}
               />
             </View>
           )}
@@ -136,11 +134,11 @@ const Product = memo(
             <Text
               numberOfLines={2}
               className="text-center h-14 text-[#454857] text-[16px]">
-              {name}
+              {p.name}
             </Text>
             <View className="w-full h-[0.5px] bg-[#252836]"></View>
             <View className="flex-row justify-between items-center mt-4">
-              <Text className={`text-[#1F1D2B] `}>{price}</Text>
+              <Text className={`text-[#1F1D2B] `}>{p.price.dine_in}</Text>
               <LinearGradient
                 start={{x: 0.0, y: 0}}
                 end={{x: 1, y: 1}}
@@ -157,7 +155,7 @@ const Product = memo(
       </View>
     );
   },
-  (prev, last) => prev.name === last.name,
+  (prev, last) => prev.p.name === last.p.name,
 );
 
 export default NewSale;

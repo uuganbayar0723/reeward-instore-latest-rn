@@ -17,6 +17,9 @@
       ],
       "@constants/*": [
         "src/constants/*"
+      ],
+      "@navigators/*": [
+        "src/navigators/*"
       ]
     }
   }
