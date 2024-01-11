@@ -147,7 +147,6 @@ function Modifier({modifier, setProduct}: any) {
 
 const ModifierItem = memo(
   ({modifierItem, modifier, setProduct, totalQuantity}: any) => {
-    console.log(modifierItem.name.en_US);
     function handleModifierChange(modifierItem: any) {
       if (modifierItem.quantity >= modifierItem.max_quantity) return;
       if (totalQuantity >= modifier.max_quantity) return;
@@ -251,7 +250,7 @@ function Footer({product}: any) {
         )}
       </AppText>
       <View className="mt-4">
-        <AppButton text={`Add ${totalPrice}`} />
+        <AppButton text={`Add ${totalPrice.toFixed(2)}`} />
       </View>
     </View>
   );
