@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import AppButton from '@components/AppButton';
+import AppButton, {ButtonHeights} from '@components/AppButton';
 import {useAppSelector} from '@store/index';
 import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
@@ -73,12 +73,13 @@ function NewSale(): React.JSX.Element {
       ) : (
         <View>
           <ScrollView
-            className="px-4"
+            className="px-screenPadding"
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
             {categories.map((c: any, index: string) => (
               <View key={c.id} className="my-2 mr-4">
                 <AppButton
+                  buttonHeight={ButtonHeights.Small}
                   isDisabled={activeCategoryId !== c.id}
                   onPress={() => {
                     if (activeCategoryId === c.id) return;
@@ -91,7 +92,7 @@ function NewSale(): React.JSX.Element {
             ))}
           </ScrollView>
           <FlatList
-            className="mb-14"
+            className="mb-14 px-screenPadding"
             data={products}
             keyExtractor={item => item.id}
             initialNumToRender={1}

@@ -6,6 +6,8 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import AppText from '@components/AppText';
 import {TouchableOpacity, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import FastImage from 'react-native-fast-image';
+import CloseIcon from '@assets/icons/close.png';
 
 export type MainStackParamList = {
   MainTab: undefined;
@@ -26,7 +28,7 @@ export default function MainNavigator() {
         headerShadowVisible: false,
         headerTitleStyle: {
           fontSize: 16,
-          fontWeight: 'bold'
+          fontWeight: 'bold',
         },
         headerRight: HeaderRight,
         headerLeft: () => <View></View>,
@@ -51,8 +53,8 @@ function HeaderRight() {
   const navigation = useNavigation();
 
   return (
-    <TouchableOpacity className="p-3" onPress={() => navigation.goBack()}>
-      <AppText>x</AppText>
+    <TouchableOpacity className="" onPress={() => navigation.goBack()}>
+      <FastImage className="w-5 h-5" source={CloseIcon} />
     </TouchableOpacity>
   );
 }

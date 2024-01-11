@@ -10,6 +10,7 @@ import AppLinear from '@components/AppLinear';
 import colors from '@constants/colors';
 import AppButton from '@components/AppButton';
 
+
 export default function ProductDetail({
   route,
 }: HasParamsScreen): React.JSX.Element {
