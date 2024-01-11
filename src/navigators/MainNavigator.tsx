@@ -3,6 +3,9 @@ import MainTabNavigator from './MainTabNavigator';
 import ProductDetail from '@screens/ProductDetail';
 
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import AppText from '@components/AppText';
+import {TouchableOpacity, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 export type MainStackParamList = {
   MainTab: undefined;
@@ -18,13 +21,38 @@ const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 export default function MainNavigator() {
   return (
-    <MainStack.Navigator>
+    <MainStack.Navigator
+      screenOptions={{
+        headerShadowVisible: false,
+        headerTitleStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        },
+        headerRight: HeaderRight,
+        headerLeft: () => <View></View>,
+      }}>
       <MainStack.Screen
         options={{headerShown: false}}
         name="MainTab"
         component={MainTabNavigator}
       />
-      <MainStack.Screen name="ProductDetail" component={ProductDetail} />
+      <MainStack.Screen
+        options={{
+          title: 'Foods',
+        }}
+        name="ProductDetail"
+        component={ProductDetail}
+      />
     </MainStack.Navigator>
+  );
+}
+
+function HeaderRight() {
+  const navigation = useNavigation();
+
+  return (
+    <TouchableOpacity className="p-3" onPress={() => navigation.goBack()}>
+      <AppText>x</AppText>
+    </TouchableOpacity>
   );
 }

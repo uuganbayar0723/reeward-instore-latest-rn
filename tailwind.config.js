@@ -4,7 +4,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#EB4689'
+        primary: '#EB4689',
+        textGray: '#5A5C67'
+      },
+      spacing: {
+        screenPadding: '14px'
       }
     },
   },

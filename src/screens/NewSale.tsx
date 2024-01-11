@@ -19,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigators/MainNavigator';
 import LoadingView from '@components/LoadingView';
+import AppLinear from '@components/AppLinear';
 
 const IMAGE_SIZE = 110;
 
@@ -146,16 +147,13 @@ const Product = memo(
             <View className="w-full h-[0.5px] bg-[#252836]"></View>
             <View className="flex-row justify-between items-center mt-4">
               <Text className={`text-[#1F1D2B] `}>{p.price.dine_in}</Text>
-              <LinearGradient
-                start={{x: 0.0, y: 0}}
-                end={{x: 1, y: 1}}
-                colors={['#EB4689', '#FD6A6B']}
+              <AppLinear
                 style={{shadowColor: '#1F1D2B'}}
                 className="rounded-xl  w-10 h-10 shadow-lg">
                 <TouchableOpacity className="flex-1 justify-center items-center">
                   <Text className="text-white">+</Text>
                 </TouchableOpacity>
-              </LinearGradient>
+              </AppLinear>
             </View>
           </View>
         </TouchableOpacity>
