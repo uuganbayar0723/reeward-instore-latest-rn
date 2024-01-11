@@ -1,5 +1,5 @@
 import AppText from '@components/AppText';
-import React, {useEffect, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {ScrollView, View, Text, FlatList, TouchableOpacity} from 'react-native';
 import {HasParamsScreen} from '@navigators/MainNavigator';
 import {useGetMenuQuery} from '@store/services/api';
@@ -9,7 +9,6 @@ import FastImage from 'react-native-fast-image';
 import AppLinear from '@components/AppLinear';
 import colors from '@constants/colors';
 import AppButton from '@components/AppButton';
-
 
 export default function ProductDetail({
   route,
@@ -87,27 +86,6 @@ function Modifier({modifier, setProduct}: any) {
     0,
   );
 
-  function handleModifierChange(modifierItem: any) {
-    if (modifierItem.quantity >= modifierItem.max_quantity) return;
-    if (totalQuantity >= modifier.max_quantity) return;
-
-    setProduct((prevProduct: any) => ({
-      ...prevProduct,
-      modifier_list: prevProduct.modifier_list.map((modifierLocal: any) => ({
-        ...modifierLocal,
-        modifier_value_list: modifierLocal.modifier_value_list.map(
-          (modifierItemLocal: any) => ({
-            ...modifierItemLocal,
-            quantity:
-              modifierItem._id === modifierItemLocal._id
-                ? modifierItemLocal.quantity + 1
-                : modifierItemLocal.quantity,
-          }),
-        ),
-      })),
-    }));
-  }
-
   function handleReset() {
     setProduct((prevProduct: any) => ({
       ...prevProduct,
@@ -128,7 +106,7 @@ function Modifier({modifier, setProduct}: any) {
 
   return (
     <View className="mt-4">
-      <View className="flex-row justify-between">
+      <View className="flex-row justify-between items-center">
         <View className="flex-row">
           <AppText className="text-black">{modifier.name.en_US}</AppText>
           {modifier.min_quantity >= 1 && (
@@ -140,13 +118,13 @@ function Modifier({modifier, setProduct}: any) {
             </View>
           )}
         </View>
-        <TouchableOpacity onPress={handleReset} className="bg-red-10-">
+        <TouchableOpacity onPress={handleReset} className="p-1">
           <AppText className="text-textGray font-bold">Reset Choice</AppText>
         </TouchableOpacity>
       </View>
       {
         <FlatList
-          className="mt-2"
+          className="mt-1"
           ItemSeparatorComponent={() => <View className="w-4"></View>}
           showsHorizontalScrollIndicator={false}
           horizontal={true}
@@ -154,43 +132,79 @@ function Modifier({modifier, setProduct}: any) {
           maxToRenderPerBatch={1}
           data={modifier.modifier_value_list}
           renderItem={({item: modifierItem}) => (
-            <AppLinear
-              color={modifierItem.quantity ? '' : colors.gray}
-              className="w-40 p-2 px-3 rounded-lg">
-              <TouchableOpacity
-                onPress={() => handleModifierChange(modifierItem)}>
-                <AppText
-                  className={`${
-                    modifierItem.quantity ? 'text-white' : 'text-textGray'
-                  }`}>
-                  {modifierItem.name.en_US}
-                </AppText>
-                <View className="flex-row mt-1 justify-between">
-                  {!modifier.isModifierSingle ? (
-                    <AppText
-                      className={`${
-                        modifierItem.quantity ? 'text-white' : 'text-black'
-                      } `}>
-                      QTY {modifierItem.quantity}/{modifierItem.max_quantity}
-                    </AppText>
-                  ) : (
-                    <View></View>
-                  )}
-                  <AppText
-                    className={`${
-                      modifierItem.quantity ? 'text-white' : 'text-black'
-                    }  text-right font-bold`}>
-                    ${modifierItem.price ? modifierItem.price.dine_in : 0}
-                  </AppText>
-                </View>
-              </TouchableOpacity>
-            </AppLinear>
+            <ModifierItem
+              modifierItem={modifierItem}
+              modifier={modifier}
+              setProduct={setProduct}
+              totalQuantity={totalQuantity}
+            />
           )}
         />
       }
     </View>
   );
 }
+
+const ModifierItem = memo(
+  ({modifierItem, modifier, setProduct, totalQuantity}: any) => {
+    console.log(modifierItem.name.en_US);
+    function handleModifierChange(modifierItem: any) {
+      if (modifierItem.quantity >= modifierItem.max_quantity) return;
+      if (totalQuantity >= modifier.max_quantity) return;
+
+      setProduct((prevProduct: any) => ({
+        ...prevProduct,
+        modifier_list: prevProduct.modifier_list.map((modifierLocal: any) => ({
+          ...modifierLocal,
+          modifier_value_list: modifierLocal.modifier_value_list.map(
+            (modifierItemLocal: any) => ({
+              ...modifierItemLocal,
+              quantity:
+                modifierItem._id === modifierItemLocal._id
+                  ? modifierItemLocal.quantity + 1
+                  : modifierItemLocal.quantity,
+            }),
+          ),
+        })),
+      }));
+    }
+    return (
+      <AppLinear
+        color={modifierItem.quantity ? '' : colors.gray}
+        className="min-w-[140px] p-2 px-3 rounded-lg">
+        <TouchableOpacity onPress={() => handleModifierChange(modifierItem)}>
+          <AppText
+            className={`${
+              modifierItem.quantity ? 'text-white' : 'text-textGray'
+            }`}>
+            {modifierItem.name.en_US}
+          </AppText>
+          <View className="flex-row mt-1 justify-between">
+            {!modifier.isModifierSingle ? (
+              <AppText
+                className={`${
+                  modifierItem.quantity ? 'text-white' : 'text-black'
+                } `}>
+                QTY {modifierItem.quantity}/{modifierItem.max_quantity}
+              </AppText>
+            ) : (
+              <View></View>
+            )}
+            <AppText
+              className={`${
+                modifierItem.quantity ? 'text-white' : 'text-black'
+              }  text-right font-bold`}>
+              ${modifierItem.price ? modifierItem.price.dine_in : 0}
+            </AppText>
+          </View>
+        </TouchableOpacity>
+      </AppLinear>
+    );
+  },
+  (prev, last) =>
+    prev.modifierItem.quantity === last.modifierItem.quantity &&
+    prev.totalQuantity === last.totalQuantity,
+);
 
 function Footer({product}: any) {
   const [prices, setPrices] = useState<number[]>([]);
@@ -210,11 +224,11 @@ function Footer({product}: any) {
         [],
       );
 
-      const modiferPrices = modifierItemsWithQuantity.map(
+      const modifierPrices = modifierItemsWithQuantity.map(
         (mItem: any) => mItem.price.dine_in,
       );
 
-      prices = [product.price.dine_in, ...modiferPrices];
+      prices = [product.price.dine_in, ...modifierPrices];
 
       setPrices(prices);
     }
