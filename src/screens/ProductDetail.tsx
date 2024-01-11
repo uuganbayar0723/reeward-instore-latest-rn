@@ -8,6 +8,7 @@ import LoadingView from '@components/LoadingView';
 import FastImage from 'react-native-fast-image';
 import AppLinear from '@components/AppLinear';
 import colors from '@constants/colors';
+import AppButton from '@components/AppButton';
 
 export default function ProductDetail({
   route,
@@ -39,38 +40,43 @@ export default function ProductDetail({
   }
 
   return (
-    <FlatList
-      className="px-screenPadding bg-white"
-      initialNumToRender={1}
-      maxToRenderPerBatch={1}
-      ListHeaderComponent={() => (
-        <View className="flex-row items-center">
-          {product.image_url ? (
-            <FastImage
-              style={{
-                width: 60,
-                height: 60,
-              }}
-              className="rounded-full border-white border-2 shadow-md"
-              source={{uri: product.image_url}}
-            />
-          ) : (
-            <View></View>
-          )}
-          <View className="ml-5">
-            <AppText className="text-black text-[20px]">{product.name}</AppText>
-            <AppText className="text-[12px]">{product.name}</AppText>
-            <AppText className="font-bold text-[20px] text-black">
-              ${product.price.dine_in}
-            </AppText>
+    <View className="flex-1">
+      <FlatList
+        className="px-screenPadding flex-1 bg-white relative"
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        ListHeaderComponent={() => (
+          <View className="flex-row items-center">
+            {product.image_url ? (
+              <FastImage
+                style={{
+                  width: 60,
+                  height: 60,
+                }}
+                className="rounded-full border-white border-2 shadow-md"
+                source={{uri: product.image_url}}
+              />
+            ) : (
+              <View></View>
+            )}
+            <View className="ml-5">
+              <AppText className="text-black text-[20px]">
+                {product.name}
+              </AppText>
+              <AppText className="text-[12px]">{product.name}</AppText>
+              <AppText className="font-bold text-[20px] text-black">
+                ${product.price.dine_in}
+              </AppText>
+            </View>
           </View>
-        </View>
-      )}
-      data={product.modifier_list}
-      renderItem={({item: modifier}) => (
-        <Modifier modifier={modifier} setProduct={setProduct} />
-      )}
-    />
+        )}
+        data={product.modifier_list}
+        renderItem={({item: modifier}) => (
+          <Modifier modifier={modifier} setProduct={setProduct} />
+        )}
+      />
+      <Footer product={product} />
+    </View>
   );
 }
 
@@ -140,6 +146,7 @@ function Modifier({modifier, setProduct}: any) {
       {
         <FlatList
           className="mt-2"
+          ItemSeparatorComponent={() => <View className="w-4"></View>}
           showsHorizontalScrollIndicator={false}
           horizontal={true}
           initialNumToRender={1}
@@ -148,7 +155,7 @@ function Modifier({modifier, setProduct}: any) {
           renderItem={({item: modifierItem}) => (
             <AppLinear
               color={modifierItem.quantity ? '' : colors.gray}
-              className="w-40 p-2 px-3 rounded-lg mr-5">
+              className="w-40 p-2 px-3 rounded-lg">
               <TouchableOpacity
                 onPress={() => handleModifierChange(modifierItem)}>
                 <AppText
@@ -172,7 +179,7 @@ function Modifier({modifier, setProduct}: any) {
                     className={`${
                       modifierItem.quantity ? 'text-white' : 'text-black'
                     }  text-right font-bold`}>
-                    {modifier.price ? modifier.price?.dine_in : '$0'}
+                    ${modifierItem.price ? modifierItem.price.dine_in : 0}
                   </AppText>
                 </View>
               </TouchableOpacity>
@@ -180,6 +187,57 @@ function Modifier({modifier, setProduct}: any) {
           )}
         />
       }
+    </View>
+  );
+}
+
+function Footer({product}: any) {
+  const [prices, setPrices] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (product) {
+      let prices: number[] = [];
+
+      const modifierItemsWithQuantity = product.modifier_list.reduce(
+        (result: number[], current: any) => {
+          return result.concat(
+            current.modifier_value_list.filter(
+              (modifierItem: any) => modifierItem.quantity,
+            ),
+          );
+        },
+        [],
+      );
+
+      const modiferPrices = modifierItemsWithQuantity.map(
+        (mItem: any) => mItem.price.dine_in,
+      );
+
+      prices = [product.price.dine_in, ...modiferPrices];
+
+      setPrices(prices);
+    }
+  }, [product]);
+
+  const totalPrice = prices.reduce(
+    (result: number, current: number) => result + current,
+    0,
+  );
+
+  return (
+    <View
+      style={{borderTopColor: colors.gray, borderTopWidth: 2}}
+      className="px-screenPadding bg-white  py-2 ">
+      <AppText>Total:</AppText>
+      <AppText className="font-bold text-black text-[20px]">
+        {prices.map(
+          (price: number, index: number) =>
+            `${price}$${index < prices.length - 1 ? ' + ' : ''}`,
+        )}
+      </AppText>
+      <View className="mt-4">
+        <AppButton text={`Add ${totalPrice}`} />
+      </View>
     </View>
   );
 }

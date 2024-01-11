@@ -12,9 +12,9 @@ function AppText({
   ...props
 }: AppTextProps): React.JSX.Element {
   return (
-    <View className={containerClassName}>
-      <Text {...props} />
-    </View>
+    // <View className={containerClassName}>
+    <Text {...props} />
+    // </View>
   );
 }
 
