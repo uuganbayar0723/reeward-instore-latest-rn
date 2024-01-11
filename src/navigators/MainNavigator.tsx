@@ -53,8 +53,8 @@ function HeaderRight() {
   const navigation = useNavigation();
 
   return (
-    <TouchableOpacity className="" onPress={() => navigation.goBack()}>
-      <FastImage className="w-5 h-5" source={CloseIcon} />
+    <TouchableOpacity className="p-3" onPress={() => navigation.goBack()}>
+      <FastImage className="w-4 h-4" source={CloseIcon} />
     </TouchableOpacity>
   );
 }

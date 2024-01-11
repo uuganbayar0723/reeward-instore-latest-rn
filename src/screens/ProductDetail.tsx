@@ -224,7 +224,7 @@ function Footer({product}: any) {
       );
 
       const modifierPrices = modifierItemsWithQuantity.map(
-        (mItem: any) => mItem.price.dine_in,
+        (mItem: any) => mItem.price.dine_in * mItem.quantity,
       );
 
       prices = [product.price.dine_in, ...modifierPrices];
@@ -246,7 +246,7 @@ function Footer({product}: any) {
       <AppText className="font-bold text-black text-[20px]">
         {prices.map(
           (price: number, index: number) =>
-            `${price}$${index < prices.length - 1 ? ' + ' : ''}`,
+            `${price.toFixed(2)}$${index < prices.length - 1 ? ' + ' : ''}`,
         )}
       </AppText>
       <View className="mt-4">
