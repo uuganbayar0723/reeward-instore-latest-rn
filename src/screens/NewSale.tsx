@@ -20,11 +20,17 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigators/MainNavigator';
 import LoadingView from '@components/LoadingView';
 import AppLinear from '@components/AppLinear';
+import AppText from '@components/AppText';
+import Basketicon from '@assets/icons/basket.png';
 
 const IMAGE_SIZE = 110;
 
 function NewSale(): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
   let {
     data: menu,
     isLoading,
@@ -65,15 +71,27 @@ function NewSale(): React.JSX.Element {
   }, [categories]);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-bgGray pt-screenTop">
       {isLoading || !isSuccess ? (
         <View className="flex-1 justify-center">
           <LoadingView />
         </View>
       ) : (
         <View>
+          <View className="px-screenPadding flex-row justify-between items-center">
+            <AppText className="text-[24px] font-bold text-black">
+              New Sale
+            </AppText>
+            <View>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Basket')}
+                className="p-3 bg-white rounded-full">
+                <FastImage className="w-6 h-6" source={Basketicon} />
+              </TouchableOpacity>
+            </View>
+          </View>
           <ScrollView
-            className="px-screenPadding"
+            className="px-screenPadding mt-2"
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
             {categories.map((c: any, index: string) => (

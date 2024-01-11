@@ -5,10 +5,12 @@ module.exports = {
     extend: {
       colors: {
         primary: '#EB4689',
-        textGray: '#5A5C67'
+        textGray: '#5A5C67',
+        bgGray: "#F7F7F7"
       },
       spacing: {
-        screenPadding: '14px'
+        screenPadding: '14px',
+        screenTop: '10px'
       }
     },
   },

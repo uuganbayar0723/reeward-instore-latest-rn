@@ -1,9 +1,9 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainTabNavigator from './MainTabNavigator';
 import ProductDetail from '@screens/ProductDetail';
+import Basket from '@screens/Basket';
 
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import AppText from '@components/AppText';
 import {TouchableOpacity, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
@@ -12,6 +12,7 @@ import CloseIcon from '@assets/icons/close.png';
 export type MainStackParamList = {
   MainTab: undefined;
   ProductDetail: {id: string};
+  Basket: undefined
 };
 
 export type HasParamsScreen = NativeStackScreenProps<
@@ -44,6 +45,13 @@ export default function MainNavigator() {
         }}
         name="ProductDetail"
         component={ProductDetail}
+      />
+      <MainStack.Screen
+        options={{
+          title: 'Basket',
+        }}
+        name="Basket"
+        component={Basket}
       />
     </MainStack.Navigator>
   );
