@@ -1,9 +1,12 @@
 export function getModiferItemsWithQuantity(modifier_list: []) {
-  return modifier_list.reduce((result: number[], current: any) => {
+  return modifier_list.reduce((result: any, current: any) => {
     return result.concat(
-      current.modifier_value_list.filter(
-        (modifierItem: any) => modifierItem.quantity,
-      ),
+      current.modifier_value_list
+        .filter((modifierItem: any) => modifierItem.quantity)
+        .map((mItem: any) => ({
+          ...mItem,
+          wrapperModifierName: current.name.en_US,
+        })),
     );
   }, []);
 }

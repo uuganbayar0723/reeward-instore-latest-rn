@@ -9,12 +9,13 @@ import FastImage from 'react-native-fast-image';
 import AppLinear from '@components/AppLinear';
 import colors from '@constants/colors';
 import AppButton from '@components/AppButton';
-import {setBasket} from '@store/slices/basket';
+import {addToBasket, setBasket} from '@store/slices/basket';
 import {
   changeModifierItem,
   getModiferItemsWithQuantity,
   resetModifier,
 } from '@utils/helpers';
+import {useNavigation} from '@react-navigation/native';
 
 export default function ProductDetail({
   route,
@@ -209,15 +210,15 @@ function Footer({product}: any) {
   }, [product]);
 
   const dispatch = useAppDispatch();
+  const navigation = useNavigation();
 
   function handleAdd() {
     const modifierItemsWithQuantity = getModiferItemsWithQuantity(
       product.modifier_list,
     );
 
-    console.log(modifierItemsWithQuantity);
-
-    dispatch(setBasket({basketList: [], total: 100}));
+    dispatch(addToBasket({product, modifierItemsWithQuantity}));
+    navigation.goBack();
   }
 
   const totalPrice = prices.reduce(

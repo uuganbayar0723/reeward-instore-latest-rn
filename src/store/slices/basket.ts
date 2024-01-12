@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 
 export interface BasketInterface {
-  basketList: [];
+  basketList: any;
   total: number;
 }
 
@@ -19,8 +19,11 @@ const basketSlice = createSlice({
       state.basketList = action.payload.basketList;
       state.total = action.payload.total;
     },
+    addToBasket: (state: BasketInterface, action: PayloadAction<any>) => {
+      state.basketList.push(action.payload);
+    },
   },
 });
 
-export const {setBasket} = basketSlice.actions;
+export const {setBasket, addToBasket} = basketSlice.actions;
 export default basketSlice.reducer;
