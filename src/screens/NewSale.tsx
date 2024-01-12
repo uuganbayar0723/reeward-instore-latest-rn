@@ -91,7 +91,7 @@ function NewSale(): React.JSX.Element {
             </View>
           </View>
           <ScrollView
-            className="px-screenPadding mt-2 pb-[2px]"
+            className="px-screenPadding mt-2 flex-shrink-0"
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
             {categories.map((c: any, index: string) => (
@@ -136,11 +136,11 @@ const Product = memo(
       <View className="w-1/2 p-2">
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('ProductDetail', {id: p.id});
+            navigation.push('ProductDetail', {id: p.id});
           }}
           activeOpacity={0.8}
           className="relative">
-          {p.image_url && (
+          {p.image_url ? (
             <View
               style={{
                 transform: [{translateX: -(IMAGE_SIZE / 2)}],
@@ -155,6 +155,19 @@ const Product = memo(
                 className="rounded-full "
                 source={{uri: p.image_url}}
               />
+            </View>
+          ) : (
+            <View
+              style={{
+                transform: [{translateX: -(IMAGE_SIZE / 2)}],
+                borderWidth: 4,
+                width: IMAGE_SIZE,
+                height: IMAGE_SIZE,
+              }}
+              className="rounded-full absolute z-20 left-1/2  border-white ">
+              <View className="flex-1 bg-bgGray rounded-full items-center justify-center">
+                <AppText className="font-bold">No Image</AppText>
+              </View>
             </View>
           )}
           <View className="bg-white rounded-xl mt-8 pt-24 px-4 pb-4">

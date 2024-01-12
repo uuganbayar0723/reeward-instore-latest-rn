@@ -9,16 +9,17 @@ export function formatMenu(res: any) {
           categoryId: c._id,
           name: p.name.en_US,
           price: p.price,
-          id: p._id,
+          id: p.sourceId,
           image_url: p.image_url || '',
           productType: p.productType,
+          bundled_item_list: p.bundled_item_list,
           modifier_list: p.modifier_list.map((m: any) => ({
             ...m,
             isModifierSingle: m.max_quantity === m.min_quantity,
-            modifier_value_list: m.modifier_value_list.map((value:any) => ({
+            modifier_value_list: m.modifier_value_list.map((value: any) => ({
               ...value,
-              quantity: 0
-            }))
+              quantity: 0,
+            })),
           })),
           remaining_quantity: p.remaing_quantity,
           color: p.color,

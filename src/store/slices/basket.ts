@@ -3,10 +3,9 @@ import type {PayloadAction} from '@reduxjs/toolkit';
 
 export interface BasketInterface {
   basketList: any;
-  total: number;
 }
 
-const initialState: BasketInterface = {basketList: [], total: 0};
+const initialState: BasketInterface = {basketList: []};
 
 const basketSlice = createSlice({
   name: 'user',
@@ -17,7 +16,6 @@ const basketSlice = createSlice({
       action: PayloadAction<BasketInterface>,
     ) => {
       state.basketList = action.payload.basketList;
-      state.total = action.payload.total;
     },
     addToBasket: (state: BasketInterface, action: PayloadAction<any>) => {
       state.basketList.push(action.payload);
