@@ -136,7 +136,7 @@ const Product = memo(
       <View className="w-1/2 p-2">
         <TouchableOpacity
           onPress={() => {
-            navigation.push('ProductDetail', {id: p.id});
+            navigation.navigate('ProductDetail', {id: p.id});
           }}
           activeOpacity={0.8}
           className="relative">
