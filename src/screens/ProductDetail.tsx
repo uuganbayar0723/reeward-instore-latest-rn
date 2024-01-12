@@ -3,12 +3,18 @@ import React, {memo, useEffect, useState} from 'react';
 import {ScrollView, View, Text, FlatList, TouchableOpacity} from 'react-native';
 import {HasParamsScreen} from '@navigators/MainNavigator';
 import {useGetMenuQuery} from '@store/services/api';
-import {useAppSelector} from '@store/index';
+import {useAppDispatch, useAppSelector} from '@store/index';
 import LoadingView from '@components/LoadingView';
 import FastImage from 'react-native-fast-image';
 import AppLinear from '@components/AppLinear';
 import colors from '@constants/colors';
 import AppButton from '@components/AppButton';
+import {setBasket} from '@store/slices/basket';
+import {
+  changeModifierItem,
+  getModiferItemsWithQuantity,
+  resetModifier,
+} from '@utils/helpers';
 
 export default function ProductDetail({
   route,
@@ -87,21 +93,9 @@ function Modifier({modifier, setProduct}: any) {
   );
 
   function handleReset() {
-    setProduct((prevProduct: any) => ({
-      ...prevProduct,
-      modifier_list: prevProduct.modifier_list.map((modifierLocal: any) => ({
-        ...modifierLocal,
-        modifier_value_list: modifierLocal.modifier_value_list.map(
-          (modifierItemLocal: any) => ({
-            ...modifierItemLocal,
-            quantity:
-              modifier._id === modifierLocal._id
-                ? 0
-                : modifierItemLocal.quantity,
-          }),
-        ),
-      })),
-    }));
+    setProduct((prevProduct: any) =>
+      resetModifier({product: prevProduct, modifier}),
+    );
   }
 
   return (
@@ -151,21 +145,9 @@ const ModifierItem = memo(
       if (modifierItem.quantity >= modifierItem.max_quantity) return;
       if (totalQuantity >= modifier.max_quantity) return;
 
-      setProduct((prevProduct: any) => ({
-        ...prevProduct,
-        modifier_list: prevProduct.modifier_list.map((modifierLocal: any) => ({
-          ...modifierLocal,
-          modifier_value_list: modifierLocal.modifier_value_list.map(
-            (modifierItemLocal: any) => ({
-              ...modifierItemLocal,
-              quantity:
-                modifierItem._id === modifierItemLocal._id
-                  ? modifierItemLocal.quantity + 1
-                  : modifierItemLocal.quantity,
-            }),
-          ),
-        })),
-      }));
+      setProduct((prevProduct: any) =>
+        changeModifierItem({product: prevProduct, modifierItem}),
+      );
     }
     return (
       <AppLinear
@@ -212,15 +194,8 @@ function Footer({product}: any) {
     if (product) {
       let prices: number[] = [];
 
-      const modifierItemsWithQuantity = product.modifier_list.reduce(
-        (result: number[], current: any) => {
-          return result.concat(
-            current.modifier_value_list.filter(
-              (modifierItem: any) => modifierItem.quantity,
-            ),
-          );
-        },
-        [],
+      const modifierItemsWithQuantity = getModiferItemsWithQuantity(
+        product.modifier_list,
       );
 
       const modifierPrices = modifierItemsWithQuantity.map(
@@ -232,6 +207,18 @@ function Footer({product}: any) {
       setPrices(prices);
     }
   }, [product]);
+
+  const dispatch = useAppDispatch();
+
+  function handleAdd() {
+    const modifierItemsWithQuantity = getModiferItemsWithQuantity(
+      product.modifier_list,
+    );
+
+    console.log(modifierItemsWithQuantity);
+
+    dispatch(setBasket({basketList: [], total: 100}));
+  }
 
   const totalPrice = prices.reduce(
     (result: number, current: number) => result + current,
@@ -250,7 +237,7 @@ function Footer({product}: any) {
         )}
       </AppText>
       <View className="mt-4">
-        <AppButton text={`Add ${totalPrice.toFixed(2)}`} />
+        <AppButton onPress={handleAdd} text={`Add ${totalPrice.toFixed(2)}$`} />
       </View>
     </View>
   );

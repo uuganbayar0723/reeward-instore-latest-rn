@@ -6,19 +6,18 @@ export interface BasketInterface {
   total: number;
 }
 
-const initialState: BasketInterface | null = null;
+const initialState: BasketInterface = {basketList: [], total: 0};
 
 const basketSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
     setBasket: (
-      state: BasketInterface | null,
+      state: BasketInterface,
       action: PayloadAction<BasketInterface>,
     ) => {
-      if (state !== null) {
-        state.basketList = action.payload.basketList;
-      }
+      state.basketList = action.payload.basketList;
+      state.total = action.payload.total;
     },
   },
 });
