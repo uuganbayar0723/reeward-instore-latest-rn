@@ -293,11 +293,11 @@ function Bundle({product, setProduct}: any) {
   return (
     <>
       <ScrollView
-        className="px-screenPadding flex-grow-0 mt-2"
+        className="px-screenPadding pt-2 flex-grow-0 mt-2"
         horizontal={true}
         showsHorizontalScrollIndicator={false}>
         {product.bundled_item_list.map((b: any, index: string) => (
-          <View key={b.id} className="my-2 mr-4">
+          <View key={b.id} className="mr-4">
             <AppButton
               buttonHeight={ButtonHeights.Small}
               isDisabled={activeBundleItemId !== b._id}
@@ -372,17 +372,6 @@ const BundleProduct = memo(
               className="text-center h-14 text-[#454857] text-[16px]">
               {product.name}
             </Text>
-            {/* <View className="w-full h-[0.5px] bg-[#252836]"></View> */}
-            {/* <View className="flex-row justify-between items-center mt-4">
-              <Text className={`text-[#1F1D2B] `}>{product.price.dine_in}</Text>
-              <AppLinear
-                style={{shadowColor: '#1F1D2B'}}
-                className="rounded-xl  w-10 h-10 shadow-lg">
-                <TouchableOpacity className="flex-1 justify-center items-center">
-                  <Text className="text-white">+</Text>
-                </TouchableOpacity>
-              </AppLinear>
-            </View> */}
           </AppLinear>
         </TouchableOpacity>
       </View>

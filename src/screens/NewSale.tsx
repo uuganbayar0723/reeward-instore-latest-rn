@@ -91,11 +91,11 @@ function NewSale(): React.JSX.Element {
             </View>
           </View>
           <ScrollView
-            className="px-screenPadding mt-2 flex-shrink-0"
+            className="px-screenPadding pt-2 flex-shrink-0"
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
             {categories.map((c: any, index: string) => (
-              <View key={c.id} className="my-2 mr-4">
+              <View key={c.id} className="mr-4">
                 <AppButton
                   buttonHeight={ButtonHeights.Small}
                   isDisabled={activeCategoryId !== c.id}
@@ -110,7 +110,7 @@ function NewSale(): React.JSX.Element {
             ))}
           </ScrollView>
           <FlatList
-            className="mb-[110px] px-screenPadding"
+            className="mb-[95px] px-screenPadding"
             data={products}
             keyExtractor={item => item.id}
             initialNumToRender={1}
