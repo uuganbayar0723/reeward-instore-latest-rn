@@ -24,7 +24,7 @@ export default function ProductDetail({
   const [product, setProduct] = useState<any>(null);
   const {id} = route.params;
 
-  console.log(product)
+  console.log(product);
 
   let {
     data: menu,
@@ -185,16 +185,40 @@ function Footer({product}: any) {
   useEffect(() => {
     if (product) {
       let prices: number[] = [];
+      if (product.modifier_list.length) {
+        const modifierItemsWithQuantity = getModiferItemsWithQuantity(
+          product.modifier_list,
+        );
 
-      const modifierItemsWithQuantity = getModiferItemsWithQuantity(
-        product.modifier_list,
-      );
+        const modifierPrices = modifierItemsWithQuantity.map(
+          (mItem: any) => mItem.price.dine_in * mItem.quantity,
+        );
 
-      const modifierPrices = modifierItemsWithQuantity.map(
-        (mItem: any) => mItem.price.dine_in * mItem.quantity,
-      );
+        prices = [product.price.dine_in, ...modifierPrices];
+      }
 
-      prices = [product.price.dine_in, ...modifierPrices];
+      if (product.bundled_item_list.length) {
+        let bundleProductsWithQuantity = product.bundled_item_list.reduce(
+          (result: any, current: any) => {
+            return [
+              ...result,
+              ...current.product_list.filter((p: any) => p.quantity),
+            ];
+          },
+          [],
+        );
+
+        console.log(bundleProductsWithQuantity);
+        // const modifierItemsWithQuantity = getModiferItemsWithQuantity(
+        //   product.modifier_list,
+        // );
+
+        // const modifierPrices = modifierItemsWithQuantity.map(
+        //   (mItem: any) => mItem.price.dine_in * mItem.quantity,
+        // );
+
+        // prices = [product.price.dine_in, ...modifierPrices];
+      }
 
       setPrices(prices);
     }
@@ -350,7 +374,10 @@ const BundleProduct = memo(
     const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
     const modifierLength = bundleProduct.modifier_list.length;
 
-    function addToBundle() {
+    function changeToBundle(val: number) {
+      const {quantity} = bundleItem;
+      if (quantity === 0 && val < 0) return;
+
       setProduct((prevProduct: any) => ({
         ...prevProduct,
         bundled_item_list: prevProduct.bundled_item_list.map(
@@ -361,7 +388,7 @@ const BundleProduct = memo(
                 ...bundleProductLocal,
                 quantity:
                   bundleProductLocal._id === bundleItem._id
-                    ? bundleProductLocal.quantity + 1
+                    ? bundleProductLocal.quantity + val
                     : bundleProductLocal.quantity,
                 modifier_list:
                   bundleProductLocal._id === bundleItem._id
@@ -389,7 +416,9 @@ const BundleProduct = memo(
             </View>
             <View
               className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
-              <TouchableOpacity className={`h-full  w-12  justify-center  `}>
+              <TouchableOpacity
+                onPress={() => changeToBundle(-1)}
+                className={`h-full  w-12  justify-center  `}>
                 <AppText className="text-center">-</AppText>
               </TouchableOpacity>
               <View className="h-full w-[1px] bg-gray-300"></View>
@@ -398,7 +427,7 @@ const BundleProduct = memo(
               </AppText>
               <View className="h-full w-[1px] bg-gray-300"></View>
               <TouchableOpacity
-                onPress={addToBundle}
+                onPress={() => changeToBundle(1)}
                 className={`rounded  h-full  w-12 justify-center  `}>
                 <AppText className="text-center">+</AppText>
               </TouchableOpacity>
