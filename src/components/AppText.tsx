@@ -1,19 +1,12 @@
 import React from 'react';
 import {View, Text, TextProps} from 'react-native';
 
-interface AppTextProps extends TextProps {
-  containerClassName?: string;
-  className?: string;
-}
+interface AppTextProps extends TextProps {}
 
-function AppText({
-  containerClassName,
-  className,
-  ...props
-}: AppTextProps): React.JSX.Element {
+function AppText({...props}: AppTextProps): React.JSX.Element {
   return (
     // <View className={containerClassName}>
-    <Text {...props} />
+    <Text {...props} className={`text-black ${props.className}`} />
     // </View>
   );
 }

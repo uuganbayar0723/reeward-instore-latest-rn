@@ -24,6 +24,8 @@ export default function ProductDetail({
   const [product, setProduct] = useState<any>(null);
   const {id} = route.params;
 
+  console.log(product)
+
   let {
     data: menu,
     isLoading,
@@ -276,35 +278,42 @@ function Bundle({product, setProduct}: any) {
   const [activeBundleItemId, setActiveBundleItemId] = useState<string>(
     bundled_item_list[0]._id,
   );
-  const [bundleItemList, setBundleItemList] = useState<any>([]);
+  const [activeBundleItemList, setActiveBundleItemList] = useState<any>([]);
+  const [isTabChangeLoading, setIsTabChangeLoading] = useState<boolean>(true);
+
+  function getActiveList() {
+    const activeBundleItem = bundled_item_list.filter(
+      (b: any) => b._id === activeBundleItemId,
+    )[0];
+    return activeBundleItem?.product_list || [];
+  }
 
   useEffect(() => {
-    if (bundleItemList.length === 0 && product.bundled_item_list) {
-      const activeBundleItem = bundled_item_list.filter(
-        (b: any) => b._id === activeBundleItemId,
-      )[0];
-
-      const bundleList = activeBundleItem?.product_list || [];
-
-      setBundleItemList(bundleList);
+    if (isTabChangeLoading && bundled_item_list) {
+      setActiveBundleItemList(getActiveList());
+      setIsTabChangeLoading(false);
     }
-  }, [activeBundleItemId, bundleItemList]);
+  }, [activeBundleItemId, isTabChangeLoading]);
+
+  useEffect(() => {
+    setActiveBundleItemList(getActiveList());
+  }, [bundled_item_list]);
 
   return (
     <>
       <ScrollView
-        className="px-screenPadding pt-2 flex-grow-0 mt-2"
+        className="px-screenPadding flex-grow-0"
         horizontal={true}
         showsHorizontalScrollIndicator={false}>
         {product.bundled_item_list.map((b: any, index: string) => (
-          <View key={b.id} className="mr-4">
+          <View key={b.id} className="mr-4 pt-2">
             <AppButton
               buttonHeight={ButtonHeights.Small}
               isDisabled={activeBundleItemId !== b._id}
               onPress={() => {
                 if (activeBundleItemId === b._id) return;
                 setActiveBundleItemId(b._id);
-                setBundleItemList([]);
+                setIsTabChangeLoading(true);
               }}
               text={b.name.en_US}
             />
@@ -313,13 +322,20 @@ function Bundle({product, setProduct}: any) {
       </ScrollView>
       <FlatList
         className="px-screenPadding flex-1 bg-white relative"
+        contentContainerStyle={{paddingBottom: 10}}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
-        numColumns={2}
-        data={bundleItemList}
+        windowSize={1}
+        data={isTabChangeLoading ? [] : activeBundleItemList}
+        ListEmptyComponent={
+          <View className="h-44 justify-center">
+            <LoadingView />
+          </View>
+        }
         renderItem={({item: bundleItem}) => (
           <BundleProduct
-            product={menu.allProductsHash[bundleItem.product_id]}
+            bundleProduct={menu.allProductsHash[bundleItem.product_id]}
+            bundleItem={bundleItem}
             setProduct={setProduct}
           />
         )}
@@ -328,54 +344,92 @@ function Bundle({product, setProduct}: any) {
   );
 }
 
-const IMAGE_SIZE = 110;
 const BundleProduct = memo(
-  ({product, setProduct}: any) => {
+  ({bundleProduct: b, bundleItem, setProduct}: any) => {
+    const [bundleProduct, setBundleProduct] = useState({...b});
+    const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
+    const modifierLength = bundleProduct.modifier_list.length;
+
+    function addToBundle() {
+      setProduct((prevProduct: any) => ({
+        ...prevProduct,
+        bundled_item_list: prevProduct.bundled_item_list.map(
+          (bundleItemLocal: any) => ({
+            ...bundleItemLocal,
+            product_list: bundleItemLocal.product_list.map(
+              (bundleProductLocal: any) => ({
+                ...bundleProductLocal,
+                quantity:
+                  bundleProductLocal._id === bundleItem._id
+                    ? bundleProductLocal.quantity + 1
+                    : bundleProductLocal.quantity,
+                modifier_list:
+                  bundleProductLocal._id === bundleItem._id
+                    ? bundleProduct.modifier_list
+                    : bundleProductLocal.modifier_list,
+              }),
+            ),
+          }),
+        ),
+      }));
+    }
+
     return (
-      <View className="w-1/2 p-2 ">
-        <TouchableOpacity activeOpacity={0.8} className="relative">
-          {product.image_url ? (
-            <View
-              style={{
-                transform: [{translateX: -(IMAGE_SIZE / 2)}],
-                borderWidth: 4,
-              }}
-              className="rounded-full absolute z-20 left-1/2  border-white ">
-              <FastImage
-                style={{
-                  width: IMAGE_SIZE,
-                  height: IMAGE_SIZE,
-                }}
-                className="rounded-full "
-                source={{uri: product.image_url}}
-              />
+      <View
+        className={`w-full  mt-2 rounded-lg p-2 ${
+          modifierLength && 'border-gray-300 border '
+        } `}>
+        <View className="flex-row">
+          <View className="rounded-lg flex-1 flex-row items-center bg-bgGray p-2 pl-4 justify-between">
+            <View>
+              <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
+              <AppText className="font-bold mt-1">
+                ${bundleProduct.price.dine_in}
+              </AppText>
             </View>
+            <View
+              className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
+              <TouchableOpacity className={`h-full  w-12  justify-center  `}>
+                <AppText className="text-center">-</AppText>
+              </TouchableOpacity>
+              <View className="h-full w-[1px] bg-gray-300"></View>
+              <AppText className="w-10 text-center">
+                {bundleItem.quantity || 0}
+              </AppText>
+              <View className="h-full w-[1px] bg-gray-300"></View>
+              <TouchableOpacity
+                onPress={addToBundle}
+                className={`rounded  h-full  w-12 justify-center  `}>
+                <AppText className="text-center">+</AppText>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {modifierLength ? (
+            <TouchableOpacity
+              onPress={() => setIsModifierVisible(prev => !prev)}
+              className="w-12 items-center justify-center ">
+              <AppText>V</AppText>
+            </TouchableOpacity>
           ) : (
-            <View
-              style={{
-                transform: [{translateX: -(IMAGE_SIZE / 2)}],
-                borderWidth: 4,
-                width: IMAGE_SIZE,
-                height: IMAGE_SIZE,
-              }}
-              className="rounded-full absolute z-20 left-1/2  border-white ">
-              <View className="flex-1 bg-bgGray rounded-full items-center justify-center">
-                <AppText className="font-bold">No Image</AppText>
-              </View>
-            </View>
+            <View></View>
           )}
-          <AppLinear
-            color={colors.gray}
-            className=" rounded-xl mt-8 pt-24 px-4 pb-4">
-            <Text
-              numberOfLines={2}
-              className="text-center h-14 text-[#454857] text-[16px]">
-              {product.name}
-            </Text>
-          </AppLinear>
-        </TouchableOpacity>
+        </View>
+        {isModifierVisible ? (
+          <FlatList
+            className="flex-1  relative"
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            data={bundleProduct.modifier_list}
+            renderItem={({item: modifier}) => (
+              <Modifier modifier={modifier} setProduct={setBundleProduct} />
+            )}
+          />
+        ) : (
+          <View></View>
+        )}
       </View>
     );
   },
-  (prev, last) => prev.product.name === last.product.name,
+
+  (prev, last) => prev.bundleItem.quantity === last.bundleItem.quantity,
 );

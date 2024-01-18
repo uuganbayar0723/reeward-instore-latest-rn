@@ -1,4 +1,5 @@
 export function formatMenu(res: any) {
+  console.log(res)
   const categories = res.data.category_list
     .filter((c: any) => c._id && c.name && c.product_list.length)
     .map((c: any) => {
@@ -12,13 +13,20 @@ export function formatMenu(res: any) {
           id: p.sourceId,
           image_url: p.image_url || '',
           productType: p.productType,
-          bundled_item_list: p.bundled_item_list,
+          bundled_item_list: p.bundled_item_list.map((bundleItem: any) => ({
+            ...bundleItem,
+            product_list: bundleItem.product_list.map((bundleProduct: any) => ({
+              ...bundleProduct,
+              quantity: 0,
+              modifier_list: []
+            })),
+          })),
           modifier_list: p.modifier_list.map((m: any) => ({
             ...m,
             isModifierSingle: m.max_quantity === m.min_quantity,
             modifier_value_list: m.modifier_value_list.map((value: any) => ({
               ...value,
-              quantity: 0,
+              quantity: value.is_default ? 1 : 0,
             })),
           })),
           remaining_quantity: p.remaing_quantity,
@@ -30,6 +38,7 @@ export function formatMenu(res: any) {
   const allProducts: any = categories.reduce((result: any, current: any) => {
     return result.concat(current.product_list);
   }, []);
+
 
   const allProductsHash: any = {};
   for (let i in allProducts) {
