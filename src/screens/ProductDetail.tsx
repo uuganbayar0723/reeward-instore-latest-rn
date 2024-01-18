@@ -375,8 +375,9 @@ const BundleProduct = memo(
     const modifierLength = bundleProduct.modifier_list.length;
 
     function changeToBundle(val: number) {
-      const {quantity} = bundleItem;
+      const {quantity, max_quantity} = bundleItem;
       if (quantity === 0 && val < 0) return;
+      if(quantity === max_quantity ) return;
 
       setProduct((prevProduct: any) => ({
         ...prevProduct,
