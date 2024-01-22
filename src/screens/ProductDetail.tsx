@@ -24,8 +24,6 @@ export default function ProductDetail({
   const [product, setProduct] = useState<any>(null);
   const {id} = route.params;
 
-  console.log(product);
-
   let {
     data: menu,
     isLoading,
@@ -208,7 +206,7 @@ function Footer({product}: any) {
           [],
         );
 
-        console.log(bundleProductsWithQuantity);
+        // console.log(bundleProductsWithQuantity);
         // const modifierItemsWithQuantity = getModiferItemsWithQuantity(
         //   product.modifier_list,
         // );
@@ -299,28 +297,27 @@ function Bundle({product, setProduct}: any) {
   });
 
   const {bundled_item_list} = product;
-  const [activeBundleItemId, setActiveBundleItemId] = useState<string>(
-    bundled_item_list[0]._id,
+  const [activeBundleItem, setActiveBundleItem] = useState<any>(
+    bundled_item_list[0],
   );
-  const [activeBundleItemList, setActiveBundleItemList] = useState<any>([]);
   const [isTabChangeLoading, setIsTabChangeLoading] = useState<boolean>(true);
 
-  function getActiveList() {
-    const activeBundleItem = bundled_item_list.filter(
-      (b: any) => b._id === activeBundleItemId,
+  function getActiveItem() {
+    const activeBundleItem_l = bundled_item_list.filter(
+      (b: any) => b._id === activeBundleItem._id,
     )[0];
-    return activeBundleItem?.product_list || [];
+    return activeBundleItem_l;
   }
 
   useEffect(() => {
     if (isTabChangeLoading && bundled_item_list) {
-      setActiveBundleItemList(getActiveList());
+      setActiveBundleItem(getActiveItem());
       setIsTabChangeLoading(false);
     }
-  }, [activeBundleItemId, isTabChangeLoading]);
+  }, [activeBundleItem, isTabChangeLoading]);
 
   useEffect(() => {
-    setActiveBundleItemList(getActiveList());
+    setActiveBundleItem(getActiveItem());
   }, [bundled_item_list]);
 
   return (
@@ -333,10 +330,10 @@ function Bundle({product, setProduct}: any) {
           <View key={b.id} className="mr-4 pt-2">
             <AppButton
               buttonHeight={ButtonHeights.Small}
-              isDisabled={activeBundleItemId !== b._id}
+              isDisabled={activeBundleItem._id !== b._id}
               onPress={() => {
-                if (activeBundleItemId === b._id) return;
-                setActiveBundleItemId(b._id);
+                if (activeBundleItem._id === b._id) return;
+                setActiveBundleItem(b);
                 setIsTabChangeLoading(true);
               }}
               text={b.name.en_US}
@@ -344,23 +341,35 @@ function Bundle({product, setProduct}: any) {
           </View>
         ))}
       </ScrollView>
+
       <FlatList
         className="px-screenPadding flex-1 bg-white relative"
+        ListHeaderComponent={() => (
+          <View className="flex-row mt-1">
+            {activeBundleItem.min_quantity > 0 && (
+              <AppText className="text-primary font-bold">Must</AppText>
+            )}
+            <AppText className="ml-1">
+              ({activeBundleItem.totalQuantity}/{activeBundleItem.max_quantity})
+            </AppText>
+          </View>
+        )}
         contentContainerStyle={{paddingBottom: 10}}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
         windowSize={1}
-        data={isTabChangeLoading ? [] : activeBundleItemList}
+        data={isTabChangeLoading ? [] : activeBundleItem.product_list}
         ListEmptyComponent={
           <View className="h-44 justify-center">
             <LoadingView />
           </View>
         }
-        renderItem={({item: bundleItem}) => (
+        renderItem={({item: bundleListItem}) => (
           <BundleProduct
-            bundleProduct={menu.allProductsHash[bundleItem.product_id]}
-            bundleItem={bundleItem}
+            bundleProduct={menu.allProductsHash[bundleListItem.product_id]}
+            bundleListItem={bundleListItem}
             setProduct={setProduct}
+            activeBundleItem={activeBundleItem}
           />
         )}
       />
@@ -368,98 +377,105 @@ function Bundle({product, setProduct}: any) {
   );
 }
 
-const BundleProduct = memo(
-  ({bundleProduct: b, bundleItem, setProduct}: any) => {
-    const [bundleProduct, setBundleProduct] = useState({...b});
-    const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
-    const modifierLength = bundleProduct.modifier_list.length;
+const BundleProduct = ({
+  bundleProduct: b,
+  bundleListItem,
+  setProduct,
+  activeBundleItem,
+}: any) => {
+  const [bundleProduct, setBundleProduct] = useState({...b});
+  const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
+  const modifierLength = bundleProduct.modifier_list.length;
 
-    function changeToBundle(val: number) {
-      const {quantity, max_quantity} = bundleItem;
-      if (quantity === 0 && val < 0) return;
-      if(quantity === max_quantity ) return;
+  function changeToBundle(val: number) {
+    const {quantity, max_quantity} = bundleListItem;
+    const {totalQuantity, max_quantity: bundleMaxQuantity} = activeBundleItem;
+    if (quantity === 0 && val < 0) return;
+    if (totalQuantity + val > bundleMaxQuantity) return;
+    if (quantity + val > max_quantity) return;
 
-      setProduct((prevProduct: any) => ({
-        ...prevProduct,
-        bundled_item_list: prevProduct.bundled_item_list.map(
-          (bundleItemLocal: any) => ({
-            ...bundleItemLocal,
-            product_list: bundleItemLocal.product_list.map(
-              (bundleProductLocal: any) => ({
-                ...bundleProductLocal,
-                quantity:
-                  bundleProductLocal._id === bundleItem._id
-                    ? bundleProductLocal.quantity + val
-                    : bundleProductLocal.quantity,
-                modifier_list:
-                  bundleProductLocal._id === bundleItem._id
-                    ? bundleProduct.modifier_list
-                    : bundleProductLocal.modifier_list,
-              }),
-            ),
-          }),
-        ),
-      }));
-    }
+    setProduct((prevProduct: any) => ({
+      ...prevProduct,
+      bundled_item_list: prevProduct.bundled_item_list.map(
+        (bundleItemLocal: any) => ({
+          ...bundleItemLocal,
+          totalQuantity:
+            activeBundleItem.id === bundleItemLocal.id
+              ? bundleItemLocal.totalQuantity + val
+              : bundleItemLocal.totalQuantity,
+          product_list: bundleItemLocal.product_list.map(
+            (bundleProductLocal: any) => ({
+              ...bundleProductLocal,
+              quantity:
+                bundleProductLocal._id === bundleListItem._id
+                  ? bundleProductLocal.quantity + val
+                  : bundleProductLocal.quantity,
+              modifier_list:
+                bundleProductLocal._id === bundleListItem._id
+                  ? bundleProduct.modifier_list
+                  : bundleProductLocal.modifier_list,
+            }),
+          ),
+        }),
+      ),
+    }));
+  }
 
-    return (
-      <View
-        className={`w-full  mt-2 rounded-lg p-2 ${
-          modifierLength && 'border-gray-300 border '
-        } `}>
-        <View className="flex-row">
-          <View className="rounded-lg flex-1 flex-row items-center bg-bgGray p-2 pl-4 justify-between">
-            <View>
-              <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
-              <AppText className="font-bold mt-1">
-                ${bundleProduct.price.dine_in}
-              </AppText>
-            </View>
-            <View
-              className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
-              <TouchableOpacity
-                onPress={() => changeToBundle(-1)}
-                className={`h-full  w-12  justify-center  `}>
-                <AppText className="text-center">-</AppText>
-              </TouchableOpacity>
-              <View className="h-full w-[1px] bg-gray-300"></View>
-              <AppText className="w-10 text-center">
-                {bundleItem.quantity || 0}
-              </AppText>
-              <View className="h-full w-[1px] bg-gray-300"></View>
-              <TouchableOpacity
-                onPress={() => changeToBundle(1)}
-                className={`rounded  h-full  w-12 justify-center  `}>
-                <AppText className="text-center">+</AppText>
-              </TouchableOpacity>
-            </View>
+  return (
+    <View
+      className={`w-full  mt-2 rounded-lg p-2 ${
+        modifierLength && 'border-gray-300 border '
+      } `}>
+      <View className="flex-row">
+        <View className="rounded-lg flex-1 flex-row items-center bg-bgGray p-2 pl-4 justify-between">
+          <View>
+            <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
+            <AppText className="font-bold mt-1">
+              ${bundleProduct.price.dine_in}
+            </AppText>
           </View>
-          {modifierLength ? (
+          <View
+            className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
             <TouchableOpacity
-              onPress={() => setIsModifierVisible(prev => !prev)}
-              className="w-12 items-center justify-center ">
-              <AppText>V</AppText>
+              onPress={() => changeToBundle(-1)}
+              className={`h-full  w-12  justify-center  `}>
+              <AppText className="text-center">-</AppText>
             </TouchableOpacity>
-          ) : (
-            <View></View>
-          )}
+            <View className="h-full w-[1px] bg-gray-300"></View>
+            <AppText className="w-10 text-center">
+              {bundleListItem.quantity || 0}
+            </AppText>
+            <View className="h-full w-[1px] bg-gray-300"></View>
+            <TouchableOpacity
+              onPress={() => changeToBundle(1)}
+              className={`rounded  h-full  w-12 justify-center  `}>
+              <AppText className="text-center">+</AppText>
+            </TouchableOpacity>
+          </View>
         </View>
-        {isModifierVisible ? (
-          <FlatList
-            className="flex-1  relative"
-            initialNumToRender={1}
-            maxToRenderPerBatch={1}
-            data={bundleProduct.modifier_list}
-            renderItem={({item: modifier}) => (
-              <Modifier modifier={modifier} setProduct={setBundleProduct} />
-            )}
-          />
+        {modifierLength ? (
+          <TouchableOpacity
+            onPress={() => setIsModifierVisible(prev => !prev)}
+            className="w-12 items-center justify-center ">
+            <AppText>V</AppText>
+          </TouchableOpacity>
         ) : (
           <View></View>
         )}
       </View>
-    );
-  },
-
-  (prev, last) => prev.bundleItem.quantity === last.bundleItem.quantity,
-);
+      {isModifierVisible ? (
+        <FlatList
+          className="flex-1  relative"
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          data={bundleProduct.modifier_list}
+          renderItem={({item: modifier}) => (
+            <Modifier modifier={modifier} setProduct={setBundleProduct} />
+          )}
+        />
+      ) : (
+        <View></View>
+      )}
+    </View>
+  );
+};

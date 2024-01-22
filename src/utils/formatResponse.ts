@@ -1,5 +1,5 @@
 export function formatMenu(res: any) {
-  console.log(res)
+  // console.log(res)
   const categories = res.data.category_list
     .filter((c: any) => c._id && c.name && c.product_list.length)
     .map((c: any) => {
@@ -15,6 +15,7 @@ export function formatMenu(res: any) {
           productType: p.productType,
           bundled_item_list: p.bundled_item_list.map((bundleItem: any) => ({
             ...bundleItem,
+            totalQuantity: 0,
             product_list: bundleItem.product_list.map((bundleProduct: any) => ({
               ...bundleProduct,
               quantity: 0,
