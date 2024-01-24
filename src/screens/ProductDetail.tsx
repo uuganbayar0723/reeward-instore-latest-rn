@@ -11,6 +11,8 @@ import colors from '@constants/colors';
 import AppButton, {ButtonHeights} from '@components/AppButton';
 import {addToBasket, setBasket} from '@store/slices/basket';
 import {
+  calcIsModifierMinQuantityReached,
+  changeBundleItem,
   changeModifierItem,
   getModiferItemsWithQuantity,
   resetModifier,
@@ -77,11 +79,6 @@ export default function ProductDetail({
 }
 
 function Modifier({modifier, setProduct}: any) {
-  const totalQuantity = modifier.modifier_value_list.reduce(
-    (total: number, current: any) => total + current.quantity,
-    0,
-  );
-
   function handleReset() {
     setProduct((prevProduct: any) =>
       resetModifier({product: prevProduct, modifier}),
@@ -93,14 +90,16 @@ function Modifier({modifier, setProduct}: any) {
       <View className="flex-row justify-between items-center">
         <View className="flex-row">
           <AppText className="text-black">{modifier.name.en_US}</AppText>
-          {modifier.min_quantity >= 1 && (
-            <View className="flex-row ml-2">
-              <AppText className="text-primary font-bold">Must </AppText>
-              <AppText className="text-black ">
-                ({totalQuantity}/{modifier.min_quantity})
+          <View className="flex-row ml-2">
+            {modifier.min_quantity >= 1 && (
+              <AppText className="text-primary font-bold">
+                Min quantity({modifier.min_quantity})
               </AppText>
-            </View>
-          )}
+            )}
+            <AppText className="text-black ml-1 ">
+              ({modifier.totalQuantity}/{modifier.max_quantity})
+            </AppText>
+          </View>
         </View>
         <TouchableOpacity onPress={handleReset} className="p-1">
           <AppText className="text-textGray font-bold">Reset Choice</AppText>
@@ -120,7 +119,7 @@ function Modifier({modifier, setProduct}: any) {
               modifierItem={modifierItem}
               modifier={modifier}
               setProduct={setProduct}
-              totalQuantity={totalQuantity}
+              totalQuantity={modifier.totalQuantity}
             />
           )}
         />
@@ -136,7 +135,7 @@ const ModifierItem = memo(
       if (totalQuantity >= modifier.max_quantity) return;
 
       setProduct((prevProduct: any) =>
-        changeModifierItem({product: prevProduct, modifierItem}),
+        changeModifierItem({product: prevProduct, modifier, modifierItem}),
       );
     }
     return (
@@ -178,25 +177,38 @@ const ModifierItem = memo(
 );
 
 function Footer({product}: any) {
+  let user = useAppSelector(state => state.user.userState);
+
+  let {data: menu} = useGetMenuQuery({
+    outletId: user?.outletId,
+  });
   const [prices, setPrices] = useState<number[]>([]);
+  const [isAddButtonDisabled, setIsAddButtonDisabled] = useState<boolean>(true);
 
   useEffect(() => {
     if (product) {
-      let prices: number[] = [];
-      if (product.modifier_list.length) {
-        const modifierItemsWithQuantity = getModiferItemsWithQuantity(
-          product.modifier_list,
-        );
+      const {bundled_item_list, modifier_list, price} = product;
+      let prices: number[] = [price.dine_in];
 
-        const modifierPrices = modifierItemsWithQuantity.map(
-          (mItem: any) => mItem.price.dine_in * mItem.quantity,
-        );
+      if (modifier_list.length) {
+        const modifierItemsWithQuantity =
+          getModiferItemsWithQuantity(modifier_list);
 
-        prices = [product.price.dine_in, ...modifierPrices];
+        const modifierPrices = modifierItemsWithQuantity
+          .map((mItem: any) => mItem.price.dine_in * mItem.quantity)
+          .filter((price: number) => price);
+
+        prices = [...prices, ...modifierPrices];
+
+        if (calcIsModifierMinQuantityReached(modifier_list)) {
+          setIsAddButtonDisabled(false);
+        } else {
+          setIsAddButtonDisabled(true);
+        }
       }
 
-      if (product.bundled_item_list.length) {
-        let bundleProductsWithQuantity = product.bundled_item_list.reduce(
+      if (bundled_item_list.length) {
+        let bundleProductsWithQuantity = bundled_item_list.reduce(
           (result: any, current: any) => {
             return [
               ...result,
@@ -206,18 +218,30 @@ function Footer({product}: any) {
           [],
         );
 
-        // console.log(bundleProductsWithQuantity);
-        // const modifierItemsWithQuantity = getModiferItemsWithQuantity(
-        //   product.modifier_list,
-        // );
+        let bundleItemPrices = bundleProductsWithQuantity
+          .map((b: any) => {
+            const totalPriceSum = b.modifier_list.reduce(
+              (result: number, current: any) => result + current.totalPrice,
+              0,
+            );
+            return b.quantity * (b.price.dine_in + totalPriceSum);
+          })
+          .filter((p: number) => p);
 
-        // const modifierPrices = modifierItemsWithQuantity.map(
-        //   (mItem: any) => mItem.price.dine_in * mItem.quantity,
-        // );
-
-        // prices = [product.price.dine_in, ...modifierPrices];
+        prices = [...prices, ...bundleItemPrices];
+        const minQuantityNotReachedLength = bundled_item_list.filter(
+          (b: any) => b.min_quantity > b.totalQuantity,
+        ).length;
+        if (minQuantityNotReachedLength === 0) {
+          setIsAddButtonDisabled(false);
+        } else {
+          setIsAddButtonDisabled(true);
+        }
       }
 
+      if (modifier_list.length === 0 && bundled_item_list.length === 0) {
+        setIsAddButtonDisabled(false);
+      }
       setPrices(prices);
     }
   }, [product]);
@@ -226,6 +250,7 @@ function Footer({product}: any) {
   const navigation = useNavigation();
 
   function handleAdd() {
+    if (isAddButtonDisabled) return;
     const modifierItemsWithQuantity = getModiferItemsWithQuantity(
       product.modifier_list,
     );
@@ -251,7 +276,11 @@ function Footer({product}: any) {
         )}
       </AppText>
       <View className="mt-4">
-        <AppButton onPress={handleAdd} text={`Add $${totalPrice.toFixed(2)}`} />
+        <AppButton
+          isDisabled={isAddButtonDisabled}
+          onPress={handleAdd}
+          text={`Add $${totalPrice.toFixed(2)}`}
+        />
       </View>
     </View>
   );
@@ -347,7 +376,9 @@ function Bundle({product, setProduct}: any) {
         ListHeaderComponent={() => (
           <View className="flex-row mt-1">
             {activeBundleItem.min_quantity > 0 && (
-              <AppText className="text-primary font-bold">Must</AppText>
+              <AppText className="text-primary font-bold">
+                Min quantity({activeBundleItem.min_quantity})
+              </AppText>
             )}
             <AppText className="ml-1">
               ({activeBundleItem.totalQuantity}/{activeBundleItem.max_quantity})
@@ -390,36 +421,37 @@ const BundleProduct = ({
   function changeToBundle(val: number) {
     const {quantity, max_quantity} = bundleListItem;
     const {totalQuantity, max_quantity: bundleMaxQuantity} = activeBundleItem;
+    const {modifier_list} = bundleProduct;
+
     if (quantity === 0 && val < 0) return;
     if (totalQuantity + val > bundleMaxQuantity) return;
     if (quantity + val > max_quantity) return;
+    if (!calcIsModifierMinQuantityReached(modifier_list)) return;
 
-    setProduct((prevProduct: any) => ({
-      ...prevProduct,
-      bundled_item_list: prevProduct.bundled_item_list.map(
-        (bundleItemLocal: any) => ({
-          ...bundleItemLocal,
-          totalQuantity:
-            activeBundleItem.id === bundleItemLocal.id
-              ? bundleItemLocal.totalQuantity + val
-              : bundleItemLocal.totalQuantity,
-          product_list: bundleItemLocal.product_list.map(
-            (bundleProductLocal: any) => ({
-              ...bundleProductLocal,
-              quantity:
-                bundleProductLocal._id === bundleListItem._id
-                  ? bundleProductLocal.quantity + val
-                  : bundleProductLocal.quantity,
-              modifier_list:
-                bundleProductLocal._id === bundleListItem._id
-                  ? bundleProduct.modifier_list
-                  : bundleProductLocal.modifier_list,
-            }),
-          ),
-        }),
-      ),
-    }));
+    setProduct((prevProduct: any) =>
+      changeBundleItem({
+        product: prevProduct,
+        activeBundleItem,
+        val,
+        bundleListItem,
+        bundleProduct,
+      }),
+    );
   }
+
+  useEffect(() => {
+    if (bundleListItem.quantity > 0) {
+      setProduct((prevProduct: any) =>
+        changeBundleItem({
+          product: prevProduct,
+          activeBundleItem,
+          val: -(bundleListItem.quantity),
+          bundleListItem,
+          bundleProduct,
+        }),
+      );
+    }
+  }, [bundleProduct]);
 
   return (
     <View
@@ -431,7 +463,7 @@ const BundleProduct = ({
           <View>
             <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
             <AppText className="font-bold mt-1">
-              ${bundleProduct.price.dine_in}
+              ${bundleListItem.price.dine_in}
             </AppText>
           </View>
           <View
