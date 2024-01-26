@@ -12,6 +12,7 @@ export function formatMenu(res: any) {
           id: p.sourceId,
           image_url: p.image_url || '',
           productType: p.productType,
+          quantity: 0,
           bundled_item_list: p.bundled_item_list.map((bundleItem: any) => ({
             ...bundleItem,
             totalQuantity: 0,

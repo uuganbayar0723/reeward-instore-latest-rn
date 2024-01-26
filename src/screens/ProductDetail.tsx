@@ -151,24 +151,17 @@ function Footer({product}: any) {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
 
-  console.log(
-    product.bundled_item_list
-      .filter((bItem: any) => bItem.totalQuantity)
-      .map((bItem: any) => bItem.product_list)
-      .reduce((result: any, current: any) => {
-        return [...result, ...current];
-      }, []),
-  );
-
   function handleAdd() {
     const {bundled_item_list, modifier_list} = product;
 
     if (isAddButtonDisabled) return;
-    const modifierItemsWithQuantity = getModiferItemsWithQuantity(
-      product.modifier_list,
-    );
+    if (modifier_list) {
+      const modifierItemsWithQuantity = getModiferItemsWithQuantity(
+        product.modifier_list,
+      );
+    }
 
-    dispatch(addToBasket({product, modifierItemsWithQuantity}));
+    dispatch(addToBasket(product));
     navigation.goBack();
   }
 
@@ -347,18 +340,6 @@ const BundleProduct = memo(
         }),
       );
     }
-
-    // useEffect(() => {
-    //   setProduct((prevProduct: any) =>
-    //     changeBundleItem({
-    //       product: prevProduct,
-    //       activeBundleItem,
-    //       val: bundleListItem.quantity,
-    //       bundleListItem,
-    //       bundleProduct,
-    //     }),
-    //   );
-    // }, [bundleProduct.modifier_list]);
 
     return (
       <View

@@ -18,7 +18,22 @@ const basketSlice = createSlice({
       state.basketList = action.payload.basketList;
     },
     addToBasket: (state: BasketInterface, action: PayloadAction<any>) => {
-      state.basketList.push(action.payload);
+      const {payload} = action;
+
+      const hasSameProduct = state.basketList.filter(
+        (product: any) => product.id === payload.id,
+      ).length;
+      if (hasSameProduct) {
+        state.basketList = state.basketList.map((product: any) => ({
+          ...product,
+          quantity:
+            product.id === payload.id ? product.quantity + 1 : product.quantity,
+        }));
+
+        return;
+      }
+
+      state.basketList.push({...payload, quantity: payload.quantity + 1});
     },
   },
 });
