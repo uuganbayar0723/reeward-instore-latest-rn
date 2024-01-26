@@ -26,7 +26,7 @@ export function formatMenu(res: any) {
             isModifierSingle: m.max_quantity === m.min_quantity,
             modifier_value_list: modifierInitQuantity(m.modifier_value_list),
             totalQuantity: calcTotalQuantity(m.modifier_value_list),
-            totalPrice: 0,
+            totalPrice: calcTotalPrice(m.modifier_value_list),
           })),
           remaining_quantity: p.remaing_quantity,
           color: p.color,
