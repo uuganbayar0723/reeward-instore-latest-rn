@@ -78,7 +78,6 @@ export default function ProductDetail({
   );
 }
 
-
 function Footer({product}: any) {
   let user = useAppSelector(state => state.user.userState);
 
@@ -152,14 +151,14 @@ function Footer({product}: any) {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
 
-  // console.log(
-  //   product.bundled_item_list
-  //     .filter((bItem: any) => bItem.totalQuantity)
-  //     .map((bItem: any) => bItem.product_list)
-  //     .reduce((result: any, current: any) => {
-  //       return [...result, ...current];
-  //     }, []),
-  // );
+  console.log(
+    product.bundled_item_list
+      .filter((bItem: any) => bItem.totalQuantity)
+      .map((bItem: any) => bItem.product_list)
+      .reduce((result: any, current: any) => {
+        return [...result, ...current];
+      }, []),
+  );
 
   function handleAdd() {
     const {bundled_item_list, modifier_list} = product;
@@ -322,110 +321,104 @@ function Bundle({product, setProduct}: any) {
   );
 }
 
-const BundleProduct = ({
-  bundleProduct: b,
-  bundleListItem,
-  setProduct,
-  activeBundleItem,
-}: any) => {
-  const [bundleProduct, setBundleProduct] = useState({...b});
-  const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
-  const modifierLength = bundleProduct.modifier_list.length;
+const BundleProduct = memo(
+  ({bundleProduct: b, bundleListItem, setProduct, activeBundleItem}: any) => {
+    const [bundleProduct, setBundleProduct] = useState({...b});
+    const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
+    const modifierLength = bundleProduct.modifier_list.length;
 
-  function changeToBundle(val: number) {
-    const {quantity, max_quantity} = bundleListItem;
-    const {totalQuantity, max_quantity: bundleMaxQuantity} = activeBundleItem;
-    const {modifier_list} = bundleProduct;
+    function changeToBundle(val: number) {
+      const {quantity, max_quantity} = bundleListItem;
+      const {totalQuantity, max_quantity: bundleMaxQuantity} = activeBundleItem;
+      const {modifier_list} = bundleProduct;
 
-    if (quantity === 0 && val < 0) return;
-    if (totalQuantity + val > bundleMaxQuantity) return;
-    if (quantity + val > max_quantity) return;
-    if (!calcIsModifierMinQuantityReached(modifier_list)) return;
+      if (quantity === 0 && val < 0) return;
+      if (totalQuantity + val > bundleMaxQuantity) return;
+      if (quantity + val > max_quantity) return;
+      if (!calcIsModifierMinQuantityReached(modifier_list)) return;
 
-    setProduct((prevProduct: any) =>
-      changeBundleItem({
-        product: prevProduct,
-        activeBundleItem,
-        val,
-        bundleListItem,
-        bundleProduct,
-      }),
-    );
-  }
+      setProduct((prevProduct: any) =>
+        changeBundleItem({
+          product: prevProduct,
+          activeBundleItem,
+          val,
+          bundleListItem,
+          bundleProduct,
+        }),
+      );
+    }
 
-  console.log(bundleListItem);
+    // useEffect(() => {
+    //   setProduct((prevProduct: any) =>
+    //     changeBundleItem({
+    //       product: prevProduct,
+    //       activeBundleItem,
+    //       val: bundleListItem.quantity,
+    //       bundleListItem,
+    //       bundleProduct,
+    //     }),
+    //   );
+    // }, [bundleProduct.modifier_list]);
 
-
-  // useEffect(() => {
-  //   setProduct((prevProduct: any) =>
-  //     changeBundleItem({
-  //       product: prevProduct,
-  //       activeBundleItem,
-  //       val: bundleListItem.quantity,
-  //       bundleListItem,
-  //       bundleProduct,
-  //     }),
-  //   );
-  // }, [bundleProduct.modifier_list]);
-
-  return (
-    <View
-      className={`w-full  mt-2 rounded-lg p-2 ${
-        modifierLength && 'border-gray-300 border '
-      } `}>
-      <View className="flex-row">
-        <View className="rounded-lg flex-1 flex-row items-center bg-bgGray p-2 pl-4 justify-between">
-          <View>
-            <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
-            <AppText className="font-bold mt-1">
-              ${bundleListItem.price.dine_in}
-            </AppText>
+    return (
+      <View
+        className={`w-full  mt-2 rounded-lg p-2 ${
+          modifierLength && 'border-gray-300 border '
+        } `}>
+        <View className="flex-row">
+          <View className="rounded-lg flex-1 flex-row items-center bg-bgGray p-2 pl-4 justify-between">
+            <View>
+              <AppText style={{maxWidth: 160}}>{bundleProduct.name}</AppText>
+              <AppText className="font-bold mt-1">
+                ${bundleListItem.price.dine_in}
+              </AppText>
+            </View>
+            <View
+              className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
+              <TouchableOpacity
+                onPress={() => changeToBundle(-1)}
+                className={`h-full  w-12  justify-center  `}>
+                <AppText className="text-center">-</AppText>
+              </TouchableOpacity>
+              <View className="h-full w-[1px] bg-gray-300"></View>
+              <AppText className="w-10 text-center">
+                {bundleListItem.quantity || 0}
+              </AppText>
+              <View className="h-full w-[1px] bg-gray-300"></View>
+              <TouchableOpacity
+                onPress={() => changeToBundle(1)}
+                className={`rounded  h-full  w-12 justify-center  `}>
+                <AppText className="text-center">+</AppText>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View
-            className={` h-12 py-2 flex-row items-center ml-5 bg-white rounded-lg`}>
+          {modifierLength ? (
             <TouchableOpacity
-              onPress={() => changeToBundle(-1)}
-              className={`h-full  w-12  justify-center  `}>
-              <AppText className="text-center">-</AppText>
+              onPress={() => setIsModifierVisible(prev => !prev)}
+              className="w-12 items-center justify-center ">
+              <AppText>V</AppText>
             </TouchableOpacity>
-            <View className="h-full w-[1px] bg-gray-300"></View>
-            <AppText className="w-10 text-center">
-              {bundleListItem.quantity || 0}
-            </AppText>
-            <View className="h-full w-[1px] bg-gray-300"></View>
-            <TouchableOpacity
-              onPress={() => changeToBundle(1)}
-              className={`rounded  h-full  w-12 justify-center  `}>
-              <AppText className="text-center">+</AppText>
-            </TouchableOpacity>
-          </View>
+          ) : (
+            <View></View>
+          )}
         </View>
-        {modifierLength ? (
-          <TouchableOpacity
-            onPress={() => setIsModifierVisible(prev => !prev)}
-            className="w-12 items-center justify-center ">
-            <AppText>V</AppText>
-          </TouchableOpacity>
+        {isModifierVisible ? (
+          <FlatList
+            className="flex-1  relative"
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            data={bundleProduct.modifier_list}
+            renderItem={({item: modifier}) => (
+              <Modifier modifier={modifier} setProduct={setBundleProduct} />
+            )}
+          />
         ) : (
           <View></View>
         )}
       </View>
-      {isModifierVisible ? (
-        <FlatList
-          className="flex-1  relative"
-          initialNumToRender={1}
-          maxToRenderPerBatch={1}
-          data={bundleProduct.modifier_list}
-          renderItem={({item: modifier}) => (
-            <Modifier modifier={modifier} setProduct={setBundleProduct} />
-          )}
-        />
-      ) : (
-        <View></View>
-      )}
-    </View>
-  );
-};
+    );
+  },
+);
 
 function Modifier({modifier, setProduct}: any) {
   function handleReset() {
