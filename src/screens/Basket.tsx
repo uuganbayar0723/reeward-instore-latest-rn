@@ -42,7 +42,7 @@ function BasketItem({product}: any) {
         <AppText className="text-[12px]">{product.name}</AppText>
         <View
           style={{borderWidth: 1, borderColor: colors.gray}}
-          className={`h-12 py-2 flex-row items-center bg-white  rounded-lg`}>
+          className={`h-12 py-2 mt-4 flex-row items-center bg-white  rounded-lg`}>
           <TouchableOpacity
             // onPress={() => changeToBundle(-1)}
             className={`h-full  w-12  justify-center  `}>

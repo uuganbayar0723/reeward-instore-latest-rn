@@ -28,8 +28,12 @@ const basketSlice = createSlice({
       if (hasSameProduct) {
         state.basketList = state.basketList.map((product: any) => ({
           ...product,
-          quantity:
-            product.id === payload.id ? product.quantity + 1 : product.quantity,
+          quantity: compareObjects(
+            {...product, quantity: payload.quantity},
+            payload,
+          )
+            ? product.quantity + 1
+            : product.quantity,
         }));
 
         return;
