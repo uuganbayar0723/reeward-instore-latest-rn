@@ -15,7 +15,6 @@ export function formatMenu(res: any) {
           quantity: 0,
           bundled_item_list: p.bundled_item_list.map((bundleItem: any) => ({
             ...bundleItem,
-            totalQuantity: 0,
             product_list: bundleItem.product_list.map((bundleProduct: any) => ({
               ...bundleProduct,
               quantity: 0,
@@ -26,8 +25,6 @@ export function formatMenu(res: any) {
             ...m,
             isModifierSingle: m.max_quantity === m.min_quantity,
             modifier_value_list: modifierInitQuantity(m.modifier_value_list),
-            totalQuantity: calcTotalQuantity(m.modifier_value_list),
-            totalPrice: calcTotalPrice(m.modifier_value_list),
           })),
           remaining_quantity: p.remaing_quantity,
           color: p.color,
@@ -59,19 +56,3 @@ function modifierInitQuantity(modifier_value_list: any[]) {
   }));
 }
 
-function calcTotalQuantity(modifier_value_list: any[]) {
-  const modifier_list = modifierInitQuantity(modifier_value_list);
-  return modifier_list.reduce(
-    (total: number, current: any) => total + current.quantity,
-    0,
-  );
-}
-
-function calcTotalPrice(modifier_value_list: any[]) {
-  const modifier_list = modifierInitQuantity(modifier_value_list);
-  return modifier_list.reduce(
-    (total: number, current: any) =>
-      total + current.quantity * current.price.dine_in,
-    0,
-  );
-}

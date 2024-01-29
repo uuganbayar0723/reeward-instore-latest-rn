@@ -24,18 +24,6 @@ export function changeModifierItem({product, modifier, modifierItem}: any) {
     ...product,
     modifier_list: product.modifier_list.map((modifierLocal: any) => ({
       ...modifierLocal,
-      totalQuantity: isSameModifier({
-        modifierLocal,
-        modifier,
-        ifTrue: modifierLocal.totalQuantity + 1,
-        ifFalse: modifierLocal.totalQuantity,
-      }),
-      totalPrice: isSameModifier({
-        modifierLocal,
-        modifier,
-        ifTrue: modifierLocal.totalPrice + modifierItem.price.dine_in,
-        ifFalse: modifierLocal.totalPrice,
-      }),
       modifier_value_list: modifierLocal.modifier_value_list.map(
         (modifierItemLocal: any) => ({
           ...modifierItemLocal,
@@ -47,14 +35,6 @@ export function changeModifierItem({product, modifier, modifierItem}: any) {
       ),
     })),
   };
-}
-
-function isSameModifier({modifierLocal, modifier, ifTrue, ifFalse}: any) {
-  if (modifierLocal.id === modifier.id) {
-    return ifTrue;
-  } else {
-    return ifFalse;
-  }
 }
 
 export function calcIsModifierMinQuantityReached(modifier_list: any) {
@@ -77,10 +57,6 @@ export function changeBundleItem({
     bundled_item_list: product.bundled_item_list.map(
       (bundleItemLocal: any) => ({
         ...bundleItemLocal,
-        totalQuantity:
-          activeBundleItem.id === bundleItemLocal.id
-            ? bundleItemLocal.totalQuantity + val
-            : bundleItemLocal.totalQuantity,
         product_list: bundleItemLocal.product_list.map(
           (bundleProductLocal: any) => ({
             ...bundleProductLocal,
@@ -99,13 +75,17 @@ export function changeBundleItem({
   };
 }
 
+export function calcBundleItemTotalQuantity(bundleItem: any) {
+  return bundleItem.product_list.reduce((result: number, current: any) => {
+    return result + current.quantity;
+  }, 0);
+}
+
 export function resetModifier({product, modifier}: any) {
   return {
     ...product,
     modifier_list: product.modifier_list.map((modifierLocal: any) => ({
       ...modifierLocal,
-      totalQuantity:
-        modifier._id === modifierLocal._id ? 0 : modifierLocal.totalQuantity,
       modifier_value_list: modifierLocal.modifier_value_list.map(
         (modifierItemLocal: any) => ({
           ...modifierItemLocal,
@@ -115,4 +95,19 @@ export function resetModifier({product, modifier}: any) {
       ),
     })),
   };
+}
+
+export function calcModifierTotalQuantity(modifier: any) {
+  return modifier.modifier_value_list.reduce(
+    (total: number, current: any) => total + current.quantity,
+    0,
+  );
+}
+
+export function calcModifierTotalPrice(modifier: any) {
+  return modifier.modifier_value_list.reduce(
+    (total: number, current: any) =>
+      total + current.quantity * current.price.dine_in,
+    0,
+  );
 }

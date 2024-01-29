@@ -11,7 +11,10 @@ import colors from '@constants/colors';
 import AppButton, {ButtonHeights} from '@components/AppButton';
 import {addToBasket, setBasket} from '@store/slices/basket';
 import {
+  calcBundleItemTotalQuantity,
   calcIsModifierMinQuantityReached,
+  calcModifierTotalPrice,
+  calcModifierTotalQuantity,
   changeBundleItem,
   changeModifierItem,
   getBundleItemsWithQuantity,
@@ -112,10 +115,11 @@ function Footer({product}: any) {
       if (bundled_item_list.length) {
         let bundleProductsWithQuantity = getBundleItemsWithQuantity(product);
 
+
         let bundleItemPrices = bundleProductsWithQuantity
           .map((b: any) => {
             const totalPriceSum = b.modifier_list.reduce(
-              (result: number, current: any) => result + current.totalPrice,
+              (result: number, current: any) => result + calcModifierTotalPrice(current),
               0,
             );
             return b.quantity * (b.price.dine_in + totalPriceSum);
@@ -124,7 +128,7 @@ function Footer({product}: any) {
 
         prices = [...prices, ...bundleItemPrices];
         const minQuantityNotReachedLength = bundled_item_list.filter(
-          (b: any) => b.min_quantity > b.totalQuantity,
+          (b: any) => b.min_quantity > calcBundleItemTotalQuantity(b),
         ).length;
         if (minQuantityNotReachedLength === 0) {
           setIsAddButtonDisabled(false);
@@ -211,13 +215,7 @@ function Header({product}: any) {
 function Bundle({product, setProduct}: any) {
   let user = useAppSelector(state => state.user.userState);
 
-  let {
-    data: menu,
-    isLoading,
-    isSuccess,
-    isFetching,
-    error,
-  } = useGetMenuQuery({
+  let {data: menu} = useGetMenuQuery({
     outletId: user?.outletId,
   });
 
@@ -277,7 +275,8 @@ function Bundle({product, setProduct}: any) {
               </AppText>
             )}
             <AppText className="ml-1">
-              ({activeBundleItem.totalQuantity}/{activeBundleItem.max_quantity})
+              ({calcBundleItemTotalQuantity(activeBundleItem)}/
+              {activeBundleItem.max_quantity})
             </AppText>
           </View>
         )}
@@ -312,8 +311,10 @@ const BundleProduct = memo(
 
     function changeToBundle(val: number) {
       const {quantity, max_quantity} = bundleListItem;
-      const {totalQuantity, max_quantity: bundleMaxQuantity} = activeBundleItem;
+      const {max_quantity: bundleMaxQuantity} = activeBundleItem;
       const {modifier_list} = bundleProduct;
+
+      const totalQuantity = calcBundleItemTotalQuantity(activeBundleItem);
 
       if (quantity === 0 && val < 0) return;
       if (totalQuantity + val > bundleMaxQuantity) return;
@@ -398,6 +399,8 @@ function Modifier({modifier, setProduct}: any) {
     );
   }
 
+  const totalQuantity = calcModifierTotalQuantity(modifier);
+
   return (
     <View className="mt-4">
       <View className="flex-row justify-between items-center">
@@ -410,7 +413,7 @@ function Modifier({modifier, setProduct}: any) {
               </AppText>
             )}
             <AppText className="text-black ml-1 ">
-              ({modifier.totalQuantity}/{modifier.max_quantity})
+              ({totalQuantity}/{modifier.max_quantity})
             </AppText>
           </View>
         </View>
@@ -432,7 +435,7 @@ function Modifier({modifier, setProduct}: any) {
               modifierItem={modifierItem}
               modifier={modifier}
               setProduct={setProduct}
-              totalQuantity={modifier.totalQuantity}
+              totalQuantity={totalQuantity}
             />
           )}
         />
