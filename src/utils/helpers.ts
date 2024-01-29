@@ -17,7 +17,21 @@ export function getBundleItemsWithQuantity(product: any) {
   }, []);
 }
 
-export function formatToBasket(product: any) {}
+export function formatToBasket(product: any) {
+  let result = [];
+  if (product.modifier_list) {
+    const modifiersWithQuantity = getModiferItemsWithQuantity(product);
+    result = modifiersWithQuantity.map((mItem: any) => ({
+      quantity: mItem.quantity,
+      name: mItem.name.en_US,
+      price: mItem.price.dine_in * mItem.quantity,
+      subItem: []
+    }));
+    console.log(result);
+  }
+
+  return result;
+}
 
 export function changeModifierItem({product, modifier, modifierItem}: any) {
   return {
@@ -63,10 +77,10 @@ export function changeBundleItem({
               bundleProductLocal._id === bundleListItem._id
                 ? val
                 : bundleProductLocal.quantity,
-            modifier_list:
+            bProduct:
               bundleProductLocal._id === bundleListItem._id
-                ? bundleProduct.modifier_list
-                : bundleProductLocal.modifier_list,
+                ? bundleProduct
+                : bundleProductLocal.bProduct,
           }),
         ),
       }),

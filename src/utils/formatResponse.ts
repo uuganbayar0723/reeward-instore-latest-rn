@@ -18,7 +18,8 @@ export function formatMenu(res: any) {
             product_list: bundleItem.product_list.map((bundleProduct: any) => ({
               ...bundleProduct,
               quantity: 0,
-              modifier_list: [],
+              bProduct: null
+              // modifier_list: [],
             })),
           })),
           modifier_list: p.modifier_list.map((m: any) => ({

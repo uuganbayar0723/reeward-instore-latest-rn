@@ -117,7 +117,7 @@ function Footer({product}: any) {
 
         let bundleItemPrices = bundleProductsWithQuantity
           .map((b: any) => {
-            const totalPriceSum = b.modifier_list.reduce(
+            const totalPriceSum = b.bProduct.modifier_list.reduce(
               (result: number, current: any) =>
                 result + calcModifierTotalPrice(current),
               0,
@@ -308,6 +308,7 @@ const BundleProduct = memo(
     const [bundleProduct, setBundleProduct] = useState({...b});
     const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
     const modifierLength = bundleProduct.modifier_list.length;
+
 
     function changeToBundle(changeVal: number) {
       const {quantity, max_quantity} = bundleListItem;

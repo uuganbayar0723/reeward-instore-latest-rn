@@ -1,6 +1,6 @@
 import AppText from '@components/AppText';
 import {useAppSelector} from '@store/index';
-import {getBundleItemsWithQuantity} from '@utils/helpers';
+import {formatToBasket, getBundleItemsWithQuantity} from '@utils/helpers';
 import {FlatList, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native';
@@ -29,6 +29,7 @@ export default function Basket() {
 function BasketItem({product}: any) {
   // console.log(product.bundled_item_list)
   // console.log(getBundleItemsWithQuantity(product));
+  const subList = formatToBasket(product);
 
   return (
     <View className="flex-row">
@@ -40,6 +41,18 @@ function BasketItem({product}: any) {
       <View className="pl-4">
         <AppText>{product.name}</AppText>
         <AppText className="text-[12px]">{product.name}</AppText>
+        <FlatList
+          data={subList}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          renderItem={({item}) => (
+            <View className='flex-row justify-between '>
+              <AppText>{item.quantity}</AppText>
+              <AppText>{item.name}</AppText>
+              <AppText>{item.price}</AppText>
+            </View>
+          )}
+        />
         <View
           style={{borderWidth: 1, borderColor: colors.gray}}
           className={`h-12 py-2 mt-4 flex-row items-center bg-white  rounded-lg`}>
