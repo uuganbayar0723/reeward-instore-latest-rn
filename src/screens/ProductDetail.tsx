@@ -93,8 +93,7 @@ function Footer({product}: any) {
       let prices: number[] = [price.dine_in];
 
       if (modifier_list.length) {
-        const modifierItemsWithQuantity =
-          getModiferItemsWithQuantity(modifier_list);
+        const modifierItemsWithQuantity = getModiferItemsWithQuantity(product);
 
         const modifierPrices = modifierItemsWithQuantity
           .map((mItem: any) => mItem.price.dine_in * mItem.quantity)
@@ -156,9 +155,7 @@ function Footer({product}: any) {
 
     if (isAddButtonDisabled) return;
     if (modifier_list) {
-      const modifierItemsWithQuantity = getModiferItemsWithQuantity(
-        product.modifier_list,
-      );
+      const modifierItemsWithQuantity = getModiferItemsWithQuantity(product);
     }
 
     dispatch(addToBasket(product));

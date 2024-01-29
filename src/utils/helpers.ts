@@ -1,5 +1,5 @@
-export function getModiferItemsWithQuantity(modifier_list: []) {
-  return modifier_list.reduce((result: any, current: any) => {
+export function getModiferItemsWithQuantity(product: any) {
+  return product.modifier_list.reduce((result: any, current: any) => {
     return result.concat(
       current.modifier_value_list
         .filter((modifierItem: any) => modifierItem.quantity)
@@ -9,6 +9,19 @@ export function getModiferItemsWithQuantity(modifier_list: []) {
         })),
     );
   }, []);
+}
+
+export function getBundleItemsWithQuantity(product: any) {
+  return product.bundled_item_list
+    .filter((bundleItem: any) => bundleItem.totalQuantity)
+    .map((bItem: any) => bItem.product_list)
+    .reduce((result: any, current: any) => {
+      return result.concat(current.filter((product: any) => product.quantity));
+    }, []);
+}
+
+export function formatToBasket(product: any) {
+
 }
 
 export function changeModifierItem({product, modifier, modifierItem}: any) {
@@ -90,8 +103,6 @@ export function changeBundleItem({
     ),
   };
 }
-
-
 
 export function resetModifier({product, modifier}: any) {
   return {
