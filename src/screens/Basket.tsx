@@ -6,15 +6,15 @@ export default function Basket() {
   const basket = useAppSelector(state => state.basket);
   const {basketList} = basket;
 
-
   return (
     <View className="bg-white px-screenPadding flex-1">
       <AppText>Basket</AppText>
       <FlatList
-        data={basketList}
+        data={basketList || []}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
-        renderItem={({item: product}) => <BasketItem product={product} />}
+        keyExtractor={(item, index: number) => `${item.id}${index}`}
+        renderItem={({item: product, index}) => <BasketItem key={index} product={product} />}
       />
     </View>
   );
@@ -23,7 +23,9 @@ export default function Basket() {
 function BasketItem({product}: any) {
   return (
     <View>
-      <AppText className='text-black'>{product.name}</AppText>
+      <AppText className="text-black">
+        {product.name} {product.quantity}
+      </AppText>
     </View>
   );
 }

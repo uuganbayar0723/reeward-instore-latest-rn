@@ -1,5 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
+import {compareObjects} from '@utils/utils';
 
 export interface BasketInterface {
   basketList: any;
@@ -20,8 +21,9 @@ const basketSlice = createSlice({
     addToBasket: (state: BasketInterface, action: PayloadAction<any>) => {
       const {payload} = action;
 
-      const hasSameProduct = state.basketList.filter(
-        (product: any) => product.id === payload.id,
+      const hasSameProduct = state.basketList.filter((product: any) =>
+        // assign same quantity to compare objects
+        compareObjects({...product, quantity: payload.quantity}, payload),
       ).length;
       if (hasSameProduct) {
         state.basketList = state.basketList.map((product: any) => ({
