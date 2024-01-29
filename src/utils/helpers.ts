@@ -12,17 +12,12 @@ export function getModiferItemsWithQuantity(product: any) {
 }
 
 export function getBundleItemsWithQuantity(product: any) {
-  return product.bundled_item_list
-    .filter((bundleItem: any) => bundleItem.totalQuantity)
-    .map((bItem: any) => bItem.product_list)
-    .reduce((result: any, current: any) => {
-      return result.concat(current.filter((product: any) => product.quantity));
-    }, []);
+  return product.bundled_item_list.reduce((result: any, current: any) => {
+    return [...result, ...current.product_list.filter((p: any) => p.quantity)];
+  }, []);
 }
 
-export function formatToBasket(product: any) {
-
-}
+export function formatToBasket(product: any) {}
 
 export function changeModifierItem({product, modifier, modifierItem}: any) {
   return {

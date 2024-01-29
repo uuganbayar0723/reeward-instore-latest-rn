@@ -14,6 +14,7 @@ import {
   calcIsModifierMinQuantityReached,
   changeBundleItem,
   changeModifierItem,
+  getBundleItemsWithQuantity,
   getModiferItemsWithQuantity,
   resetModifier,
 } from '@utils/helpers';
@@ -109,15 +110,7 @@ function Footer({product}: any) {
       }
 
       if (bundled_item_list.length) {
-        let bundleProductsWithQuantity = bundled_item_list.reduce(
-          (result: any, current: any) => {
-            return [
-              ...result,
-              ...current.product_list.filter((p: any) => p.quantity),
-            ];
-          },
-          [],
-        );
+        let bundleProductsWithQuantity = getBundleItemsWithQuantity(product);
 
         let bundleItemPrices = bundleProductsWithQuantity
           .map((b: any) => {
