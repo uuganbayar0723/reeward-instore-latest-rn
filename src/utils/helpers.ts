@@ -19,18 +19,33 @@ export function getBundleItemsWithQuantity(product: any) {
 
 export function formatToBasket(product: any) {
   let result = [];
-  if (product.modifier_list) {
-    const modifiersWithQuantity = getModiferItemsWithQuantity(product);
-    result = modifiersWithQuantity.map((mItem: any) => ({
-      quantity: mItem.quantity,
-      name: mItem.name.en_US,
-      price: mItem.price.dine_in * mItem.quantity,
-      subItem: []
+  const {modifier_list, bundled_item_list} = product;
+
+  if (modifier_list.length) {
+    result = formatModifierForBasket(product);
+  }
+
+  if (bundled_item_list.length) {
+    const itemsWithQuantity = getBundleItemsWithQuantity(product);
+    result = itemsWithQuantity.map((bItem: any) => ({
+      quantity: bItem.quantity,
+      name: bItem.bProduct.name,
+      price: bItem.price.dine_in * bItem.quantity,
+      subItem: formatModifierForBasket(bItem.bProduct),
     }));
-    console.log(result);
   }
 
   return result;
+}
+
+function formatModifierForBasket(product: any) {
+  const modifiersWithQuantity = getModiferItemsWithQuantity(product);
+  return modifiersWithQuantity.map((mItem: any) => ({
+    quantity: mItem.quantity,
+    name: mItem.name.en_US,
+    price: mItem.price.dine_in * mItem.quantity,
+    subItem: [],
+  }));
 }
 
 export function changeModifierItem({product, modifier, modifierItem}: any) {

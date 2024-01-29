@@ -31,6 +31,7 @@ function BasketItem({product}: any) {
   // console.log(getBundleItemsWithQuantity(product));
   const subList = formatToBasket(product);
 
+
   return (
     <View className="flex-row">
       <FastImage
@@ -38,7 +39,7 @@ function BasketItem({product}: any) {
         className="w-14 bg-gray-100 shadow-md h-14 rounded-full"
         source={{uri: product.image_url}}
       />
-      <View className="pl-4">
+      <View className="pl-4 flex-1">
         <AppText>{product.name}</AppText>
         <AppText className="text-[12px]">{product.name}</AppText>
         <FlatList
@@ -55,7 +56,7 @@ function BasketItem({product}: any) {
         />
         <View
           style={{borderWidth: 1, borderColor: colors.gray}}
-          className={`h-12 py-2 mt-4 flex-row items-center bg-white  rounded-lg`}>
+          className={`h-12 self-start py-2 mt-4 flex-row items-center bg-white  rounded-lg`}>
           <TouchableOpacity
             // onPress={() => changeToBundle(-1)}
             className={`h-full  w-12  justify-center  `}>
