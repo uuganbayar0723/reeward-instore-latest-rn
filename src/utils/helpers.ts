@@ -39,7 +39,7 @@ export function changeModifierItem({product, modifier, modifierItem}: any) {
 
 export function calcIsModifierMinQuantityReached(modifier_list: any) {
   const minQuantityNotReachedLength = modifier_list.filter(
-    (b: any) => b.min_quantity > b.totalQuantity,
+    (m: any) => m.min_quantity > calcModifierTotalQuantity(m),
   ).length;
 
   return minQuantityNotReachedLength === 0;
@@ -47,7 +47,6 @@ export function calcIsModifierMinQuantityReached(modifier_list: any) {
 
 export function changeBundleItem({
   product,
-  activeBundleItem,
   val,
   bundleListItem,
   bundleProduct,
@@ -62,7 +61,7 @@ export function changeBundleItem({
             ...bundleProductLocal,
             quantity:
               bundleProductLocal._id === bundleListItem._id
-                ? bundleProductLocal.quantity + val
+                ? val
                 : bundleProductLocal.quantity,
             modifier_list:
               bundleProductLocal._id === bundleListItem._id

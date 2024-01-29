@@ -115,11 +115,11 @@ function Footer({product}: any) {
       if (bundled_item_list.length) {
         let bundleProductsWithQuantity = getBundleItemsWithQuantity(product);
 
-
         let bundleItemPrices = bundleProductsWithQuantity
           .map((b: any) => {
             const totalPriceSum = b.modifier_list.reduce(
-              (result: number, current: any) => result + calcModifierTotalPrice(current),
+              (result: number, current: any) =>
+                result + calcModifierTotalPrice(current),
               0,
             );
             return b.quantity * (b.price.dine_in + totalPriceSum);
@@ -309,23 +309,33 @@ const BundleProduct = memo(
     const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
     const modifierLength = bundleProduct.modifier_list.length;
 
-    function changeToBundle(val: number) {
+    function changeToBundle(changeVal: number) {
       const {quantity, max_quantity} = bundleListItem;
       const {max_quantity: bundleMaxQuantity} = activeBundleItem;
       const {modifier_list} = bundleProduct;
 
       const totalQuantity = calcBundleItemTotalQuantity(activeBundleItem);
 
-      if (quantity === 0 && val < 0) return;
-      if (totalQuantity + val > bundleMaxQuantity) return;
-      if (quantity + val > max_quantity) return;
+      if (quantity === 0 && changeVal < 0) return;
+      if (totalQuantity + changeVal > bundleMaxQuantity) return;
+      if (quantity + changeVal > max_quantity) return;
       if (!calcIsModifierMinQuantityReached(modifier_list)) return;
 
       setProduct((prevProduct: any) =>
         changeBundleItem({
           product: prevProduct,
-          activeBundleItem,
-          val,
+          val: quantity + changeVal,
+          bundleListItem,
+          bundleProduct,
+        }),
+      );
+    }
+
+    function onModifierChange() {
+      setProduct((prevProduct: any) =>
+        changeBundleItem({
+          product: prevProduct,
+          val: 0,
           bundleListItem,
           bundleProduct,
         }),
@@ -381,7 +391,11 @@ const BundleProduct = memo(
             maxToRenderPerBatch={1}
             data={bundleProduct.modifier_list}
             renderItem={({item: modifier}) => (
-              <Modifier modifier={modifier} setProduct={setBundleProduct} />
+              <Modifier
+                onModifierChange={onModifierChange}
+                modifier={modifier}
+                setProduct={setBundleProduct}
+              />
             )}
           />
         ) : (
@@ -392,11 +406,14 @@ const BundleProduct = memo(
   },
 );
 
-function Modifier({modifier, setProduct}: any) {
+function Modifier({modifier, setProduct, onModifierChange}: any) {
   function handleReset() {
     setProduct((prevProduct: any) =>
       resetModifier({product: prevProduct, modifier}),
     );
+    if (onModifierChange) {
+      onModifierChange();
+    }
   }
 
   const totalQuantity = calcModifierTotalQuantity(modifier);
@@ -432,6 +449,7 @@ function Modifier({modifier, setProduct}: any) {
           data={modifier.modifier_value_list}
           renderItem={({item: modifierItem}) => (
             <ModifierItem
+              onModifierChange={onModifierChange}
               modifierItem={modifierItem}
               modifier={modifier}
               setProduct={setProduct}
@@ -445,7 +463,13 @@ function Modifier({modifier, setProduct}: any) {
 }
 
 const ModifierItem = memo(
-  ({modifierItem, modifier, setProduct, totalQuantity}: any) => {
+  ({
+    modifierItem,
+    modifier,
+    setProduct,
+    totalQuantity,
+    onModifierChange,
+  }: any) => {
     function handleModifierChange(modifierItem: any) {
       if (modifierItem.quantity >= modifierItem.max_quantity) return;
       if (totalQuantity >= modifier.max_quantity) return;
@@ -453,6 +477,9 @@ const ModifierItem = memo(
       setProduct((prevProduct: any) =>
         changeModifierItem({product: prevProduct, modifier, modifierItem}),
       );
+      if (onModifierChange) {
+        onModifierChange();
+      }
     }
     return (
       <AppLinear
