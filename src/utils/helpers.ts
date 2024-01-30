@@ -139,3 +139,42 @@ export function calcModifierTotalPrice(modifier: any) {
     0,
   );
 }
+
+function calcModifierQuantitySum(modifier_list: any) {
+  return modifier_list.reduce((result: number, current: any) => {
+    return result + calcModifierTotalPrice(current);
+  }, 0);
+}
+
+function calcBundleProductTotalPrice(bItem: any) {
+  const {quantity, price, bProduct} = bItem;
+  const {modifier_list} = bProduct;
+
+  return quantity * (price.dine_in + calcModifierQuantitySum(modifier_list));
+}
+
+export function calcProductTotalPrice(product: any) {
+  const {price, modifier_list, bundled_item_list, quantity} = product;
+
+  let result = price.dine_in;
+
+  if (modifier_list.length) {
+    const modiferTotalSum = calcModifierQuantitySum(modifier_list);
+    result = result + modiferTotalSum;
+  }
+
+  if (bundled_item_list.length) {
+    const bundleItemsWithQuantity = getBundleItemsWithQuantity(product);
+
+    const bundleQuantitySum = bundleItemsWithQuantity.reduce(
+      (result: number, current: any) => {
+        return result + calcBundleProductTotalPrice(current);
+      },
+      0,
+    );
+
+    result = result + bundleQuantitySum;
+  }
+
+  return (result * quantity).toFixed(2);
+}

@@ -1,6 +1,10 @@
 import AppText from '@components/AppText';
 import {useAppDispatch, useAppSelector} from '@store/index';
-import {formatToBasket, getBundleItemsWithQuantity} from '@utils/helpers';
+import {
+  calcProductTotalPrice,
+  formatToBasket,
+  getBundleItemsWithQuantity,
+} from '@utils/helpers';
 import {FlatList, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native';
@@ -52,7 +56,10 @@ function BasketItem({product}: any) {
             className="w-14 bg-gray-100 shadow-md h-14 rounded-full"
             source={{uri: product.image_url}}
           />
-          <AppText className="font-bold ml-4">{product.name}</AppText>
+          <View className="ml-4">
+            <AppText className="font-bold ">{product.name}</AppText>
+            <AppText className="font-bold">$ {product.price.dine_in}</AppText>
+          </View>
         </View>
         <TouchableOpacity onPress={removeItem} className="p-2">
           <FastImage className="h-3 w-3" source={CloseIcon} />
@@ -80,24 +87,31 @@ function BasketItem({product}: any) {
             </>
           )}
         />
-        <View
-          style={{borderWidth: 1, borderColor: colors.gray}}
-          className={`h-12 self-end py-2 mt-6 flex-row items-center bg-white  rounded-lg`}>
-          <TouchableOpacity
-            onPress={() => changeQuantityBy(-1)}
-            className={`h-full  w-12  justify-center  `}>
-            <AppText className="text-center">-</AppText>
-          </TouchableOpacity>
-          <View className="h-full w-[1px] bg-gray-300"></View>
-          <AppText className="w-10 text-center">
-            {product.quantity || 0}
-          </AppText>
-          <View className="h-full w-[1px] bg-gray-300"></View>
-          <TouchableOpacity
-            onPress={() => changeQuantityBy(1)}
-            className={`rounded  h-full  w-12 justify-center  `}>
-            <AppText className="text-center">+</AppText>
-          </TouchableOpacity>
+        <View className="flex-row items-center justify-between mt-6">
+          <View>
+            <AppText className="font-bold text-lg">
+              $ {calcProductTotalPrice(product)}
+            </AppText>
+          </View>
+          <View
+            style={{borderWidth: 1, borderColor: colors.gray}}
+            className={`h-12 py-2  flex-row items-center bg-white  rounded-lg`}>
+            <TouchableOpacity
+              onPress={() => changeQuantityBy(-1)}
+              className={`h-full  w-12  justify-center  `}>
+              <AppText className="text-center">-</AppText>
+            </TouchableOpacity>
+            <View className="h-full w-[1px] bg-gray-300"></View>
+            <AppText className="w-10 text-center">
+              {product.quantity || 0}
+            </AppText>
+            <View className="h-full w-[1px] bg-gray-300"></View>
+            <TouchableOpacity
+              onPress={() => changeQuantityBy(1)}
+              className={`rounded  h-full  w-12 justify-center  `}>
+              <AppText className="text-center">+</AppText>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -111,7 +125,7 @@ function BasketItemDetail({item}: any) {
         <AppText className="w-4">{item.quantity}</AppText>
         <AppText>{item.name}</AppText>
       </View>
-      <AppText>{item.price}</AppText>
+      <AppText>$ {item.price}</AppText>
     </View>
   );
 }
