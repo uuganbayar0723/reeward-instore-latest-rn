@@ -48,7 +48,7 @@ const basketSlice = createSlice({
         (product: any) => !compareObjects(product, payload),
       );
     },
-    changeItemQuantity: (
+    changeBasketItemQuantity: (
       state: BasketInterface,
       action: PayloadAction<any>,
     ) => {
@@ -69,6 +69,6 @@ const basketSlice = createSlice({
   },
 });
 
-export const {setBasket, addToBasket, removeFromBasket, changeItemQuantity} =
+export const {setBasket, addToBasket, removeFromBasket, changeBasketItemQuantity} =
   basketSlice.actions;
 export default basketSlice.reducer;

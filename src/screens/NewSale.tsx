@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import AppButton, {ButtonHeights} from '@components/AppButton';
-import {useAppSelector} from '@store/index';
+import {useAppDispatch, useAppSelector} from '@store/index';
 import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
 import colors from '@constants/colors';
@@ -22,6 +22,7 @@ import LoadingView from '@components/LoadingView';
 import AppLinear from '@components/AppLinear';
 import AppText from '@components/AppText';
 import Basketicon from '@assets/icons/basket.png';
+import {addToBasket, changeBasketItemQuantity} from '@store/slices/basket';
 
 const IMAGE_SIZE = 110;
 
@@ -116,7 +117,9 @@ function NewSale(): React.JSX.Element {
             initialNumToRender={1}
             maxToRenderPerBatch={1}
             numColumns={2}
-            renderItem={({item: p, index}) => <Product p={p} />}
+            renderItem={({item: product, index}) => (
+              <Product product={product} />
+            )}
             ListEmptyComponent={
               <ActivityIndicator color={colors.primary} className="h-44" />
             }
@@ -128,19 +131,30 @@ function NewSale(): React.JSX.Element {
 }
 
 const Product = memo(
-  ({p}: any) => {
+  ({product}: any) => {
     const navigation =
       useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
+    const dispatch = useAppDispatch();
+
+    function increaseQuantity() {
+      if (product.modifier_list.length || product.bundled_item_list.length) {
+        navigation.navigate('ProductDetail', {id: product.id});
+        return;
+      }
+
+      dispatch(addToBasket(product));
+    }
 
     return (
       <View className="w-1/2 p-2">
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('ProductDetail', {id: p.id});
+            navigation.navigate('ProductDetail', {id: product.id});
           }}
           activeOpacity={0.8}
           className="relative">
-          {p.image_url ? (
+          {product.image_url ? (
             <View
               style={{
                 transform: [{translateX: -(IMAGE_SIZE / 2)}],
@@ -153,7 +167,7 @@ const Product = memo(
                   height: IMAGE_SIZE,
                 }}
                 className="rounded-full "
-                source={{uri: p.image_url}}
+                source={{uri: product.image_url}}
               />
             </View>
           ) : (
@@ -174,15 +188,17 @@ const Product = memo(
             <Text
               numberOfLines={2}
               className="text-center h-14 text-[#454857] text-[16px]">
-              {p.name}
+              {product.name}
             </Text>
             <View className="w-full h-[0.5px] bg-[#252836]"></View>
             <View className="flex-row justify-between items-center mt-4">
-              <Text className={`text-[#1F1D2B] `}>{p.price.dine_in}</Text>
+              <Text className={`text-[#1F1D2B] `}>{product.price.dine_in}</Text>
               <AppLinear
                 style={{shadowColor: '#1F1D2B'}}
                 className="rounded-xl  w-10 h-10 shadow-lg">
-                <TouchableOpacity className="flex-1 justify-center items-center">
+                <TouchableOpacity
+                  onPress={increaseQuantity}
+                  className="flex-1 justify-center items-center">
                   <Text className="text-white">+</Text>
                 </TouchableOpacity>
               </AppLinear>
@@ -192,7 +208,7 @@ const Product = memo(
       </View>
     );
   },
-  (prev, last) => prev.p.name === last.p.name,
+  (prev, last) => prev.product.name === last.product.name,
 );
 
 export default NewSale;

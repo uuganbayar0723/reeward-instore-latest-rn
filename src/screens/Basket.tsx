@@ -6,7 +6,7 @@ import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native';
 import colors from '@constants/colors';
 import CloseIcon from '@assets/icons/close.png';
-import {changeItemQuantity, removeFromBasket} from '@store/slices/basket';
+import {changeBasketItemQuantity, removeFromBasket} from '@store/slices/basket';
 
 export default function Basket() {
   const basket = useAppSelector(state => state.basket);
@@ -40,7 +40,7 @@ function BasketItem({product}: any) {
   }
 
   function changeQuantityBy(val: number) {
-    dispatch(changeItemQuantity({product, changeVal: val}));
+    dispatch(changeBasketItemQuantity({product, changeVal: val}));
   }
 
   return (
