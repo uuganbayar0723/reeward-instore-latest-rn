@@ -11,8 +11,9 @@ export default function Basket() {
   const {basketList} = basket;
 
   return (
-    <View className="bg-white px-screenPadding flex-1">
+    <View className="bg-white  flex-1">
       <FlatList
+        className="px-screenPadding"
         data={basketList || []}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
@@ -20,7 +21,9 @@ export default function Basket() {
         renderItem={({item: product, index}) => (
           <BasketItem key={index} product={product} />
         )}
-        ItemSeparatorComponent={() => <View className="h-3"></View>}
+        ItemSeparatorComponent={() => (
+          <View className="h-px bg-bgGray my-5"></View>
+        )}
       />
     </View>
   );
@@ -31,7 +34,6 @@ function BasketItem({product}: any) {
   // console.log(getBundleItemsWithQuantity(product));
   const subList = formatToBasket(product);
 
-
   return (
     <View className="flex-row">
       <FastImage
@@ -40,23 +42,31 @@ function BasketItem({product}: any) {
         source={{uri: product.image_url}}
       />
       <View className="pl-4 flex-1">
-        <AppText>{product.name}</AppText>
-        <AppText className="text-[12px]">{product.name}</AppText>
+        <AppText className='font-bold'>{product.name}</AppText>
+        {/* <AppText className="text-[12px]">{product.name}</AppText> */}
         <FlatList
+          className="mt-4"
           data={subList}
           initialNumToRender={1}
           maxToRenderPerBatch={1}
           renderItem={({item}) => (
-            <View className='flex-row justify-between '>
-              <AppText>{item.quantity}</AppText>
-              <AppText>{item.name}</AppText>
-              <AppText>{item.price}</AppText>
-            </View>
+            <>
+              <BasketItemDetail item={item} />
+              {item.subItems.length ? (
+                <View className="pl-6">
+                  {item.subItems.map((subItem: any, index: number) => (
+                    <BasketItemDetail key={index} item={subItem} />
+                  ))}
+                </View>
+              ) : (
+                <></>
+              )}
+            </>
           )}
         />
         <View
           style={{borderWidth: 1, borderColor: colors.gray}}
-          className={`h-12 self-start py-2 mt-4 flex-row items-center bg-white  rounded-lg`}>
+          className={`h-12 self-end py-2 mt-6 flex-row items-center bg-white  rounded-lg`}>
           <TouchableOpacity
             // onPress={() => changeToBundle(-1)}
             className={`h-full  w-12  justify-center  `}>
@@ -74,6 +84,17 @@ function BasketItem({product}: any) {
           </TouchableOpacity>
         </View>
       </View>
+    </View>
+  );
+}
+
+function BasketItemDetail({item}: any) {
+  console.log(item);
+  return (
+    <View className="flex-row justify-between ">
+      <AppText>{item.quantity}</AppText>
+      <AppText>{item.name}</AppText>
+      <AppText>{item.price}</AppText>
     </View>
   );
 }

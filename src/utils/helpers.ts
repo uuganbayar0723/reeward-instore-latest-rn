@@ -31,7 +31,7 @@ export function formatToBasket(product: any) {
       quantity: bItem.quantity,
       name: bItem.bProduct.name,
       price: bItem.price.dine_in * bItem.quantity,
-      subItem: formatModifierForBasket(bItem.bProduct),
+      subItems: formatModifierForBasket(bItem.bProduct),
     }));
   }
 
@@ -44,7 +44,7 @@ function formatModifierForBasket(product: any) {
     quantity: mItem.quantity,
     name: mItem.name.en_US,
     price: mItem.price.dine_in * mItem.quantity,
-    subItem: [],
+    subItems: [],
   }));
 }
 
