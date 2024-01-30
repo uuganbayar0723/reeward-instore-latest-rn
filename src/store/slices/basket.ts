@@ -54,7 +54,7 @@ const basketSlice = createSlice({
     ) => {
       const {product: selectedProduct, changeVal} = action.payload;
 
-      state.basketList = state.basketList.map((product: any) => {
+      const updatedList = state.basketList.map((product: any) => {
         if (compareObjects(product, selectedProduct)) {
           return {
             ...product,
@@ -63,9 +63,12 @@ const basketSlice = createSlice({
         }
         return product;
       });
+
+      state.basketList = updatedList.filter((product: any) => product.quantity);
     },
   },
 });
 
-export const {setBasket, addToBasket, removeFromBasket, changeItemQuantity} = basketSlice.actions;
+export const {setBasket, addToBasket, removeFromBasket, changeItemQuantity} =
+  basketSlice.actions;
 export default basketSlice.reducer;
