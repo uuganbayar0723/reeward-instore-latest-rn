@@ -6,7 +6,7 @@ import FastImage from 'react-native-fast-image';
 import {TouchableOpacity} from 'react-native';
 import colors from '@constants/colors';
 import CloseIcon from '@assets/icons/close.png';
-import {removeFromBasket} from '@store/slices/basket';
+import {changeItemQuantity, removeFromBasket} from '@store/slices/basket';
 
 export default function Basket() {
   const basket = useAppSelector(state => state.basket);
@@ -37,6 +37,10 @@ function BasketItem({product}: any) {
 
   function removeItem() {
     dispatch(removeFromBasket(product));
+  }
+
+  function changeQuantityBy(val: number) {
+    dispatch(changeItemQuantity({product, changeVal: val}));
   }
 
   return (
@@ -80,7 +84,7 @@ function BasketItem({product}: any) {
           style={{borderWidth: 1, borderColor: colors.gray}}
           className={`h-12 self-end py-2 mt-6 flex-row items-center bg-white  rounded-lg`}>
           <TouchableOpacity
-            // onPress={() => changeToBundle(-1)}
+            onPress={() => changeQuantityBy(-1)}
             className={`h-full  w-12  justify-center  `}>
             <AppText className="text-center">-</AppText>
           </TouchableOpacity>
@@ -90,7 +94,7 @@ function BasketItem({product}: any) {
           </AppText>
           <View className="h-full w-[1px] bg-gray-300"></View>
           <TouchableOpacity
-            // onPress={() => changeToBundle(1)}
+            onPress={() => changeQuantityBy(1)}
             className={`rounded  h-full  w-12 justify-center  `}>
             <AppText className="text-center">+</AppText>
           </TouchableOpacity>

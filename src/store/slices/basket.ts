@@ -44,10 +44,28 @@ const basketSlice = createSlice({
     removeFromBasket: (state: BasketInterface, action: PayloadAction<any>) => {
       const {payload} = action;
 
-      state.basketList = state.basketList.filter((product:any) => !compareObjects(product, payload))
-    }
+      state.basketList = state.basketList.filter(
+        (product: any) => !compareObjects(product, payload),
+      );
+    },
+    changeItemQuantity: (
+      state: BasketInterface,
+      action: PayloadAction<any>,
+    ) => {
+      const {product: selectedProduct, changeVal} = action.payload;
+
+      state.basketList = state.basketList.map((product: any) => {
+        if (compareObjects(product, selectedProduct)) {
+          return {
+            ...product,
+            quantity: product.quantity + changeVal,
+          };
+        }
+        return product;
+      });
+    },
   },
 });
 
-export const {setBasket, addToBasket, removeFromBasket} = basketSlice.actions;
+export const {setBasket, addToBasket, removeFromBasket, changeItemQuantity} = basketSlice.actions;
 export default basketSlice.reducer;
