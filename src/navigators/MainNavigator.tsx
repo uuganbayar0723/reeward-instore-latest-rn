@@ -4,15 +4,18 @@ import ProductDetail from '@screens/ProductDetail';
 import Basket from '@screens/Basket';
 
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {TouchableOpacity, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import CloseIcon from '@assets/icons/close.png';
+import Payment from '@screens/Payment';
 
 export type MainStackParamList = {
   MainTab: undefined;
   ProductDetail: {id: string};
-  Basket: undefined
+  Payment: undefined;
+  Basket: undefined;
 };
 
 export type HasParamsScreen = NativeStackScreenProps<
@@ -48,6 +51,13 @@ export default function MainNavigator() {
       />
       <MainStack.Screen
         options={{
+          title: 'Payment',
+        }}
+        name="Payment"
+        component={Payment}
+      />
+      <MainStack.Screen
+        options={{
           title: 'Basket',
         }}
         name="Basket"
@@ -65,4 +75,8 @@ function HeaderRight() {
       <FastImage className="w-4 h-4" source={CloseIcon} />
     </TouchableOpacity>
   );
+}
+
+export function useMainNavigation() {
+  return useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 }

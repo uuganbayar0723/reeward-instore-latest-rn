@@ -15,9 +15,7 @@ import {useAppDispatch, useAppSelector} from '@store/index';
 import {useGetMenuQuery} from '@store/services/api';
 import FastImage from 'react-native-fast-image';
 import colors from '@constants/colors';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {MainStackParamList} from '@navigators/MainNavigator';
+import {useMainNavigation} from '@navigators/MainNavigator';
 import LoadingView from '@components/LoadingView';
 import AppLinear from '@components/AppLinear';
 import AppText from '@components/AppText';
@@ -29,8 +27,7 @@ const IMAGE_SIZE = 110;
 function NewSale(): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
 
-  const navigation =
-    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const navigation = useMainNavigation();
 
   let {
     data: menu,
@@ -132,8 +129,7 @@ function NewSale(): React.JSX.Element {
 
 const Product = memo(
   ({product}: any) => {
-    const navigation =
-      useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+    const navigation = useMainNavigation();
 
     const dispatch = useAppDispatch();
 

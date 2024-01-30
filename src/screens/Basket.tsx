@@ -11,6 +11,8 @@ import colors from '@constants/colors';
 import CloseIcon from '@assets/icons/close.png';
 import {changeBasketItemQuantity, removeFromBasket} from '@store/slices/basket';
 import {memo} from 'react';
+import AppButton from '@components/AppButton';
+import {useMainNavigation} from '@navigators/MainNavigator';
 
 export default function Basket() {
   const basket = useAppSelector(state => state.basket);
@@ -30,6 +32,7 @@ export default function Basket() {
         ItemSeparatorComponent={() => (
           <View className="h-[2px] bg-bgGray my-5"></View>
         )}
+        ListFooterComponent={Footer}
       />
     </View>
   );
@@ -129,6 +132,16 @@ function BasketItemDetail({item}: any) {
         <AppText>{item.name}</AppText>
       </View>
       <AppText>$ {item.price}</AppText>
+    </View>
+  );
+}
+
+function Footer() {
+  const navigation = useMainNavigation();
+
+  return (
+    <View className="my-6">
+      <AppButton onPress={() => navigation.navigate('Payment')} text="Pay" />
     </View>
   );
 }
