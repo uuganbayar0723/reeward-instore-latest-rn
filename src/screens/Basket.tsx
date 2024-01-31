@@ -20,8 +20,8 @@ export default function Basket() {
 
   if (basketList.length === 0) {
     return (
-      <View className='bg-white  flex-1 items-center justify-center'>
-        <AppText className='font-bold text-xl'>Empty</AppText>
+      <View className="bg-white  flex-1 items-center justify-center">
+        <AppText className="font-bold text-xl">Empty</AppText>
       </View>
     );
   }
@@ -30,7 +30,7 @@ export default function Basket() {
     <View className="bg-white  flex-1">
       <FlatList
         className="px-screenPadding"
-        data={basketList || []}
+        data={basketList}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
         keyExtractor={(item, index) => `${item.id}${index}`}

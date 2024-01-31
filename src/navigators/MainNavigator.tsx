@@ -51,7 +51,8 @@ export default function MainNavigator() {
       />
       <MainStack.Screen
         options={{
-          title: 'Payment',
+          title: 'Cash',
+          headerShown: false
         }}
         name="Payment"
         component={Payment}

@@ -6,11 +6,13 @@ module.exports = {
       colors: {
         primary: '#EB4689',
         textGray: '#5A5C67',
-        bgGray: "#F7F7F7"
+        textDarkerGray: '#454857',
+        bgGray: "#F7F7F7",
+        inputGray: '#EFEFEF'
       },
       spacing: {
         screenPadding: '14px',
-        screenTop: '10px'
+        screenTop: '20px'
       }
     },
   },

@@ -1,13 +1,23 @@
 import React from 'react';
 import {View, Text, TextProps} from 'react-native';
 
-interface AppTextProps extends TextProps {}
+interface AppTextProps extends TextProps {
+  textSize?: TextSizes;
+}
 
-function AppText({...props}: AppTextProps): React.JSX.Element {
+export enum TextSizes {
+  Small = 12,
+  Medium = 14,
+  Large = 16,
+}
+
+function AppText({textSize, ...props}: AppTextProps): React.JSX.Element {
   return (
-    // <View className={containerClassName}>
-    <Text {...props} className={`text-black ${props.className}`} />
-    // </View>
+    <Text
+      className={`text-black ${props.className}`}
+      {...props}
+      // style={{fontSize: textSize || TextSizes.Medium}}
+    />
   );
 }
 

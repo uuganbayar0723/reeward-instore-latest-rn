@@ -11,6 +11,7 @@ import AppText from '@components/AppText';
 export enum ButtonHeights {
   Small = 40,
   Medium = 50,
+  Large = 60,
 }
 
 interface AppButtonProps extends TouchableOpacityProps {
@@ -37,8 +38,7 @@ function AppButton({
         }}
         className={`${
           isDisabled && 'opacity-60'
-        } px-4 rounded-md justify-center items-center `}
-        // colors={isDisabled ? ['#F3F3F3', '#F3F3F3'] : ['#FD6A6A', '#ED4892']}
+        } px-4 rounded-lg justify-center items-center `}
         colors={['#FD6A6A', '#ED4892']}>
         <AppText className="text-white text-[16px] text-center font-bold">
           {text}
