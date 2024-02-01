@@ -1,7 +1,7 @@
 import AppText from '@components/AppText';
 import React, {memo, useCallback, useEffect, useState} from 'react';
 import {ScrollView, View, Text, FlatList, TouchableOpacity} from 'react-native';
-import {HasParamsScreen} from '@navigators/MainNavigator';
+import {RootStackScreenProps} from '@navigators/MainNavigator';
 import {useGetMenuQuery} from '@store/services/api';
 import {useAppDispatch, useAppSelector} from '@store/index';
 import LoadingView from '@components/LoadingView';
@@ -25,7 +25,7 @@ import {useNavigation} from '@react-navigation/native';
 
 export default function ProductDetail({
   route,
-}: HasParamsScreen): React.JSX.Element {
+}: RootStackScreenProps<'ProductDetail'>): React.JSX.Element {
   let user = useAppSelector(state => state.user.userState);
   const [product, setProduct] = useState<any>(null);
   const {id} = route.params;
@@ -308,7 +308,6 @@ const BundleProduct = memo(
     const [bundleProduct, setBundleProduct] = useState({...b});
     const [isModifierVisible, setIsModifierVisible] = useState<boolean>(false);
     const modifierLength = bundleProduct.modifier_list.length;
-
 
     function changeToBundle(changeVal: number) {
       const {quantity, max_quantity} = bundleListItem;

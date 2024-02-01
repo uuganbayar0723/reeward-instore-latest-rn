@@ -14,14 +14,17 @@ import Payment from '@screens/Payment';
 export type MainStackParamList = {
   MainTab: undefined;
   ProductDetail: {id: string};
-  Payment: undefined;
+  Payment: undefined | {orderId: string};
   Basket: undefined;
 };
 
-export type HasParamsScreen = NativeStackScreenProps<
-  MainStackParamList,
-  'ProductDetail'
->;
+// export type HasParamsScreen = NativeStackScreenProps<
+//   MainStackParamList,
+//   'ProductDetail'
+// >;
+
+export type RootStackScreenProps<T extends keyof MainStackParamList> =
+  NativeStackScreenProps<MainStackParamList, T>;
 
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 
@@ -51,8 +54,8 @@ export default function MainNavigator() {
       />
       <MainStack.Screen
         options={{
-          title: 'Cash',
-          headerShown: false
+          title: 'Payment',
+          headerShown: false,
         }}
         name="Payment"
         component={Payment}

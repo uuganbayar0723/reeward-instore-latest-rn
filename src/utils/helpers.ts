@@ -176,5 +176,5 @@ export function calcProductTotalPrice(product: any) {
     result = result + bundleQuantitySum;
   }
 
-  return (result * quantity).toFixed(2);
+  return result * quantity;
 }
