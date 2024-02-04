@@ -12,7 +12,7 @@ function Home(): React.JSX.Element {
 
   function logout() {
     dispatch(setToken(''));
-    storeRemoveItem(StorageKeys.Token);
+    storeRemoveItem(StorageKeys.TOKEN);
   }
 
   return (

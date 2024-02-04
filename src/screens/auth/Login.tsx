@@ -48,8 +48,8 @@ function Login(): React.JSX.Element {
         // },
       };
 
-      storeSetItem({key: StorageKeys.Token, value: token});
-      storeSetObj({key: StorageKeys.User, value: userFormatted});
+      storeSetItem({key: StorageKeys.TOKEN, value: token});
+      storeSetObj({key: StorageKeys.USER, value: userFormatted});
       dispatch(setToken(token));
       dispatch(setUser(userFormatted));
 

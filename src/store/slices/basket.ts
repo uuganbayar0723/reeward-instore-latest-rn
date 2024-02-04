@@ -1,6 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 import {compareObjects} from '@utils/utils';
+import {StorageKeys, storeSetObj} from '@utils/asyncStorage';
 
 export interface BasketInterface {
   basketList: any;
@@ -36,10 +37,12 @@ const basketSlice = createSlice({
             : product.quantity,
         }));
 
+        storeSetObj({key: StorageKeys.BASKET_LIST, value: state.basketList});
         return;
       }
 
       state.basketList.push({...payload, quantity: payload.quantity + 1});
+      storeSetObj({key: StorageKeys.BASKET_LIST, value: state.basketList});
     },
     removeFromBasket: (state: BasketInterface, action: PayloadAction<any>) => {
       const {payload} = action;
@@ -47,6 +50,8 @@ const basketSlice = createSlice({
       state.basketList = state.basketList.filter(
         (product: any) => !compareObjects(product, payload),
       );
+
+      storeSetObj({key: StorageKeys.BASKET_LIST, value: state.basketList});
     },
     changeBasketItemQuantity: (
       state: BasketInterface,
@@ -65,10 +70,15 @@ const basketSlice = createSlice({
       });
 
       state.basketList = updatedList.filter((product: any) => product.quantity);
+      storeSetObj({key: StorageKeys.BASKET_LIST, value: state.basketList});
     },
   },
 });
 
-export const {setBasket, addToBasket, removeFromBasket, changeBasketItemQuantity} =
-  basketSlice.actions;
+export const {
+  setBasket,
+  addToBasket,
+  removeFromBasket,
+  changeBasketItemQuantity,
+} = basketSlice.actions;
 export default basketSlice.reducer;
