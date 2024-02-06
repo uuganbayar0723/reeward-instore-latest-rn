@@ -26,7 +26,7 @@ import {useNavigation} from '@react-navigation/native';
 export default function ProductDetail({
   route,
 }: RootStackScreenProps<'ProductDetail'>): React.JSX.Element {
-  let user = useAppSelector(state => state.user.userState);
+  let auth = useAppSelector(state => state.auth.data);
   const [product, setProduct] = useState<any>(null);
   const {id} = route.params;
 
@@ -35,8 +35,10 @@ export default function ProductDetail({
     isLoading,
     isSuccess,
   } = useGetMenuQuery({
-    outletId: user?.outletId,
+    outletId: auth.user.outlet.id,
   });
+
+  console.log(menu);
 
   useEffect(() => {
     if (menu) {
@@ -83,11 +85,12 @@ export default function ProductDetail({
 }
 
 function Footer({product}: any) {
-  let user = useAppSelector(state => state.user.userState);
+  // let auth = useAppSelector(state => state.auth);
 
-  let {data: menu} = useGetMenuQuery({
-    outletId: user?.outletId,
-  });
+  // let {data: menu} = useGetMenuQuery({
+  //   outletId: auth.user.outlet.id,
+  // });
+
   const [prices, setPrices] = useState<number[]>([]);
   const [isAddButtonDisabled, setIsAddButtonDisabled] = useState<boolean>(true);
 
@@ -213,10 +216,10 @@ function Header({product}: any) {
 }
 
 function Bundle({product, setProduct}: any) {
-  let user = useAppSelector(state => state.user.userState);
+  let auth = useAppSelector(state => state.auth.data);
 
   let {data: menu} = useGetMenuQuery({
-    outletId: user?.outletId,
+    outletId: auth.user.outlet.id,
   });
 
   const {bundled_item_list} = product;
