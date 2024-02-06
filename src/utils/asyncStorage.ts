@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserInterface } from '@store/slices/user';
+// import { UserInterface } from '@store/slices/user';
 
 export enum StorageKeys {
-    TOKEN = 'token',
+    AUTH = 'auth',
     USER = 'user',
     HOST = 'host',
     BASKET_LIST = 'basket'
@@ -15,7 +15,6 @@ interface StoreItemInterface {
 
 interface StoreObjInterface {
   key: StorageKeys;
-  // value: UserInterface;
   value: any;
 }
 

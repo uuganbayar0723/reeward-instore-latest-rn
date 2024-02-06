@@ -1,6 +1,6 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '@store/index';
-import {setToken} from '@store/slices/auth';
+import {setAuth} from '@store/slices/auth';
 
 import {StorageKeys, storeGetItem, storeGetObj} from '@utils/asyncStorage';
 import {setUser} from '@store/slices/user';
@@ -10,7 +10,7 @@ import AuthNavigator from './AuthNavigator';
 import {setBasket} from '@store/slices/basket';
 
 export default function AppNavigator(): React.JSX.Element {
-  const token = useAppSelector(state => state.auth.token);
+  const auth = useAppSelector(state => state.auth.data);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -18,26 +18,20 @@ export default function AppNavigator(): React.JSX.Element {
   }, []);
 
   async function init() {
-    const tokenStorage = await storeGetItem(StorageKeys.TOKEN);
-    if (tokenStorage) {
-      dispatch(setToken(tokenStorage));
-    }
-    const userStorage = await storeGetObj(StorageKeys.USER);
-
-    if (tokenStorage) {
-      dispatch(setUser(userStorage));
+    const authStorage = await storeGetObj(StorageKeys.AUTH);
+    if (authStorage) {
+      dispatch(setAuth(authStorage));
     }
 
     const basketStorage = await storeGetObj(StorageKeys.BASKET_LIST);
     if (basketStorage) {
       dispatch(setBasket({basketList: basketStorage}));
-      // setBasket; console.log({basketStorage});
     }
   }
 
   return (
     <NavigationContainer>
-      {token ? <MainNavigator /> : <AuthNavigator />}
+      {auth ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

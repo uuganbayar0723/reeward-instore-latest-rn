@@ -10,11 +10,10 @@ import {
 
 import {useDispatch} from 'react-redux';
 import {useLoginMutation} from '@store/services/api';
-import {setToken} from '@store/slices/auth';
+import {setAuth} from '@store/slices/auth';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
 import AppButton from '@components/AppButton';
-import {setUser} from '@store/slices/user';
-import {storeSetItem, storeSetObj, StorageKeys} from '@utils/asyncStorage';
+import {storeSetObj, StorageKeys} from '@utils/asyncStorage';
 
 function Login(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -31,27 +30,9 @@ function Login(): React.JSX.Element {
   useEffect(() => {
     if (response.isSuccess) {
       const {data} = response.data;
-      const {token, user} = data;
-      const {email, firstname, lastname, name, role, language, outlet} = user;
-      const {_id: outletId} = outlet;
-      const userFormatted = {
-        outletId,
-        // email,
-        // firstname,
-        // lastname,
-        // name,
-        // role,
-        // language,
-        // merchant: {
-        //   id: merchantId,
-        //   name: merchantName,
-        // },
-      };
 
-      storeSetItem({key: StorageKeys.TOKEN, value: token});
-      storeSetObj({key: StorageKeys.USER, value: userFormatted});
-      dispatch(setToken(token));
-      dispatch(setUser(userFormatted));
+      storeSetObj({key: StorageKeys.AUTH, value: data});
+      dispatch(setAuth(data));
 
       Toast.show({
         type: 'success',

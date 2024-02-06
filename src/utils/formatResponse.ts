@@ -57,3 +57,7 @@ function modifierInitQuantity(modifier_value_list: any[]) {
   }));
 }
 
+
+export function generalFormat(res: any) {
+  return res.data;
+}

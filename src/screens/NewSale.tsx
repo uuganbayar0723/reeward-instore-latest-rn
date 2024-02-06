@@ -25,18 +25,16 @@ import {addToBasket, changeBasketItemQuantity} from '@store/slices/basket';
 const IMAGE_SIZE = 110;
 
 function NewSale(): React.JSX.Element {
-  let user = useAppSelector(state => state.user.userState);
-
+  let auth = useAppSelector(state => state.auth.data);
+  
   const navigation = useMainNavigation();
 
   let {
     data: menu,
     isLoading,
     isSuccess,
-    isFetching,
-    error,
   } = useGetMenuQuery({
-    outletId: user?.outletId,
+    outletId: auth.user.outlet.id,
   });
 
   let categories: any;
