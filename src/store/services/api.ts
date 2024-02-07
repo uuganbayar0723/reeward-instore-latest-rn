@@ -1,6 +1,7 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {RootState} from '..';
 import {formatMenu, generalFormat} from '@utils/formatResponse';
+import moment from 'moment';
 
 interface LoginBody {
   email: string;
@@ -29,7 +30,6 @@ export const apiSlice = createApi({
       headers.set('merchant', merchantId);
       headers.set('outlet', outletId);
 
-      console.log({headers});
       return headers;
     },
   }),
@@ -54,6 +54,19 @@ export const apiSlice = createApi({
       }),
       transformResponse: formatMenu,
     }),
+    getOrders: builder.query({
+      query: () => ({
+        url: 'https://order.reeward.app/api/orders',
+        params: {
+          limit: 20,
+          filter: JSON.stringify({
+            valueFrom: new Date().toISOString(),
+            valueTo: moment().endOf('day').toISOString(),
+          }),
+        },
+      }),
+      transformResponse: generalFormat,
+    }),
     makeOrder: builder.mutation({
       query: body => ({
         url: 'https://order.reeward.app/api/v2/storeapp/orders/checkout',
@@ -71,4 +84,5 @@ export const {
   useGetMenuQuery,
   useGetMeQuery,
   useMakeOrderMutation,
+  useGetOrdersQuery,
 } = apiSlice;
