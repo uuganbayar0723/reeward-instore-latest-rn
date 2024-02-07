@@ -178,3 +178,15 @@ export function calcProductTotalPrice(product: any) {
 
   return result * quantity;
 }
+
+export function prepareModifierRequestFormat(modifier_list: any) {
+  return modifier_list.map((modifier: any) => ({
+    id: modifier.id,
+    modifier_value_list: modifier.modifier_value_list
+      .filter((mItem: any) => mItem.quantity)
+      .map((mItem: any) => ({
+        id: mItem.id,
+        quantity: mItem.quantity,
+      })),
+  }));
+}

@@ -34,7 +34,7 @@ function NewSale(): React.JSX.Element {
     isLoading,
     isSuccess,
   } = useGetMenuQuery({
-    outletId: auth.user.outlet.id,
+    outletId: auth.user.outlet._id,
   });
 
   let categories: any;

@@ -35,10 +35,8 @@ export default function ProductDetail({
     isLoading,
     isSuccess,
   } = useGetMenuQuery({
-    outletId: auth.user.outlet.id,
+    outletId: auth.user.outlet._id,
   });
-
-  console.log(menu);
 
   useEffect(() => {
     if (menu) {
@@ -219,7 +217,7 @@ function Bundle({product, setProduct}: any) {
   let auth = useAppSelector(state => state.auth.data);
 
   let {data: menu} = useGetMenuQuery({
-    outletId: auth.user.outlet.id,
+    outletId: auth.user.outlet._id,
   });
 
   const {bundled_item_list} = product;

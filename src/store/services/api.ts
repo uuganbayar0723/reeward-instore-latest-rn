@@ -12,12 +12,24 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'https://api.reeward.app/api',
     prepareHeaders: (headers, {getState}) => {
-      const auth = (getState() as RootState).auth;
+      const auth = (getState() as RootState).auth.data;
       let token = '';
+      let merchantId = '';
+      let outletId = '';
+
       if (auth) {
-        token = auth.token;
+        const {token: aToken, user} = auth;
+        const {merchant, outlet} = user;
+        token = aToken;
+        merchantId = merchant._id;
+        outletId = outlet._id;
       }
-      headers.set('authorization', token ? `Bearer ${token}` : '');
+      // headers.set('content-Type', 'application/json');
+      headers.set('authorization', `Bearer ${token}`);
+      headers.set('merchant', merchantId);
+      headers.set('outlet', outletId);
+
+      console.log({headers});
       return headers;
     },
   }),
@@ -43,7 +55,7 @@ export const apiSlice = createApi({
       transformResponse: formatMenu,
     }),
     makeOrder: builder.mutation({
-      query: (body: LoginBody) => ({
+      query: body => ({
         url: 'https://order.reeward.app/api/v2/storeapp/orders/checkout',
         method: 'POST',
         body,
@@ -54,4 +66,9 @@ export const apiSlice = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const {useLoginMutation, useGetMenuQuery, useGetMeQuery} = apiSlice;
+export const {
+  useLoginMutation,
+  useGetMenuQuery,
+  useGetMeQuery,
+  useMakeOrderMutation,
+} = apiSlice;
