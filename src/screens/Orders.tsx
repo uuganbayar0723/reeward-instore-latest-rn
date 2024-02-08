@@ -1,4 +1,4 @@
-import {useGetOrdersQuery} from '@store/services/api';
+import {useGetMeQuery, useGetOrdersQuery} from '@store/services/api';
 import React from 'react';
 import {View, Button, Text} from 'react-native';
 

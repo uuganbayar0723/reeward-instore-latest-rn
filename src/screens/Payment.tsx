@@ -5,19 +5,16 @@ import {View, Button, Text, TouchableOpacity, ScrollView} from 'react-native';
 import {useState} from 'react';
 import {RootStackScreenProps} from '@navigators/MainNavigator';
 import {useAppSelector} from '@store/index';
-import {
-  calcBundleItemTotalQuantity,
-  calcProductTotalPrice,
-  prepareModifierRequestFormat,
-} from '@utils/helpers';
+import {calcProductTotalPrice, prepareBasketReqFormat} from '@utils/helpers';
 import {useGetMeQuery, useMakeOrderMutation} from '@store/services/api';
+import {Toast} from 'react-native-toast-message/lib/src/Toast';
 
 function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   const [amountInput, setAmountInput] = useState<string>('0');
   const [payAmount, setPayAmount] = useState<number>(0);
   const basket = useAppSelector(state => state.basket);
   const {basketList} = basket;
-  // const {data: meRes, isSuccess: meIsSuccess} = useGetMeQuery(null);
+  const {data: meRes, isSuccess: meResIsSuccess} = useGetMeQuery(null);
   // const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -55,28 +52,50 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   const [makeOrder, orderResponse] = useMakeOrderMutation();
 
   function handlePayButton(button: string) {
-    const reqBasket = basketList.map((basketItem: any) => ({
-      product_uid: basketItem.id,
-      quantity: basketItem.quantity,
-      modifier_list: prepareModifierRequestFormat(basketItem.modifier_list),
-      bundled_item_list: basketItem.bundled_item_list.map(
-        (bundleItem: any) => ({
-          id: bundleItem.id,
-          quantity: calcBundleItemTotalQuantity(bundleItem),
-          product_list: bundleItem.product_list
-            .filter((p: any) => p.quantity)
-            .map((bundleProduct: any) => ({
-              sourceId: bundleProduct.sourceId,
-              quantity: bundleProduct.quantity,
-              modifier_list: prepareModifierRequestFormat(
-                bundleProduct.bProduct.modifier_list,
-              ),
-            })),
-        }),
-      ),
-    }));
+    const reqBasket = prepareBasketReqFormat(basketList);
     makeOrder({items: reqBasket, discountList: []});
   }
+
+  useEffect(() => {
+    if (orderResponse && orderResponse.isSuccess && meRes && meResIsSuccess) {
+      const {_id} = orderResponse.data.data;
+      if (meRes.outlet.t05.terminalIP) {
+        const ws = new WebSocket(`ws://${meRes.outlet.t05.terminalIP}:8888`);
+
+        Toast.show({
+          type: 'info',
+          text1: 'Connecting to T05',
+        });
+
+        ws.onopen = () => {
+          const data = {
+            customOrderId: _id,
+            customPrintData: 'Rewardly Order',
+            total: payAmount * 100,
+          };
+          const jsonData = JSON.stringify(data);
+          ws.send(jsonData);
+        };
+        ws.onmessage = event => {
+          const message = JSON.parse(event.data);
+          console.log({message});
+          if (message) {
+            if (message.status === 'Approved') {
+              Toast.show({
+                type: 'success',
+                text1: message.status,
+              });
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: message.status,
+              });
+            }
+          }
+        };
+      }
+    }
+  }, [orderResponse]);
 
   const changeVal: number = payAmount - parseFloat(amountInput);
   const changeField: string = changeVal < 0 ? (-changeVal).toFixed(2) : '0';
@@ -167,6 +186,6 @@ const keyboardCharacters = [
 ];
 
 // const actionButtons = ['Card', 'Store credit', 'Point', 'Voucher', 'Cash'];
-const actionButtons = ['Card'];
+const actionButtons = ['Card (T05)'];
 
 export default Payment;

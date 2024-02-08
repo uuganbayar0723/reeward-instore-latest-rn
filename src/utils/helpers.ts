@@ -190,3 +190,24 @@ export function prepareModifierRequestFormat(modifier_list: any) {
       })),
   }));
 }
+
+export function prepareBasketReqFormat(basketList: any) {
+  return basketList.map((basketItem: any) => ({
+    product_uid: basketItem.id,
+    quantity: basketItem.quantity,
+    modifier_list: prepareModifierRequestFormat(basketItem.modifier_list),
+    bundled_item_list: basketItem.bundled_item_list.map((bundleItem: any) => ({
+      id: bundleItem.id,
+      quantity: calcBundleItemTotalQuantity(bundleItem),
+      product_list: bundleItem.product_list
+        .filter((p: any) => p.quantity)
+        .map((bundleProduct: any) => ({
+          sourceId: bundleProduct.sourceId,
+          quantity: bundleProduct.quantity,
+          modifier_list: prepareModifierRequestFormat(
+            bundleProduct.bProduct.modifier_list,
+          ),
+        })),
+    })),
+  }));
+}

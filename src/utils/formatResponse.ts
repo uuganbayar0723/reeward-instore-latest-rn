@@ -1,5 +1,4 @@
 export function formatMenu(res: any) {
-  console.log(res)
   const categories = res.data.category_list
     .filter((c: any) => c._id && c.name && c.product_list.length)
     .map((c: any) => {

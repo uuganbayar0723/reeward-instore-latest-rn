@@ -11,6 +11,7 @@ function Home(): React.JSX.Element {
   function logout() {
     dispatch(setAuth(null));
     storeRemoveItem(StorageKeys.AUTH);
+    storeRemoveItem(StorageKeys.BASKET_LIST);
   }
 
   return (
