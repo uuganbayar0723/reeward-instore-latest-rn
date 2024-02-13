@@ -21,15 +21,15 @@ function Login(): React.JSX.Element {
 
   const dispatch = useDispatch();
 
-  const [login, response] = useLoginMutation();
+  const [login, responseLogin] = useLoginMutation();
 
   function handleLogin() {
     login({email, password});
   }
 
   useEffect(() => {
-    if (response.isSuccess) {
-      const {data} = response.data;
+    if (responseLogin.isSuccess) {
+      const {data} = responseLogin.data;
 
       storeSetObj({key: StorageKeys.AUTH, value: data});
       dispatch(setAuth(data));
@@ -40,14 +40,14 @@ function Login(): React.JSX.Element {
         text2: `Hello ${data.user.name}`,
       });
     }
-    if (response.isError) {
+    if (responseLogin.isError) {
       Toast.show({
         type: 'error',
         text1: 'Login error',
         text2: `error`,
       });
     }
-  }, [response]);
+  }, [responseLogin]);
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-white h-44">

@@ -153,6 +153,13 @@ function calcBundleProductTotalPrice(bItem: any) {
   return quantity * (price.dine_in + calcModifierQuantitySum(modifier_list));
 }
 
+export function calcBasketTotalPriceSum(basketList:any) {
+  return basketList.reduce(
+    (result: number, current: any) => result + calcProductTotalPrice(current),
+    0,
+  );
+}
+
 export function calcProductTotalPrice(product: any) {
   const {price, modifier_list, bundled_item_list, quantity} = product;
 

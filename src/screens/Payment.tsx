@@ -1,30 +1,36 @@
 import AppButton from '@components/AppButton';
 import AppText from '@components/AppText';
 import React, {useEffect} from 'react';
-import {View, Button, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {
+  View,
+  Button,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+} from 'react-native';
 import {useState} from 'react';
 import {RootStackScreenProps} from '@navigators/MainNavigator';
-import {useAppSelector} from '@store/index';
-import {calcProductTotalPrice, prepareBasketReqFormat} from '@utils/helpers';
+import {useAppDispatch, useAppSelector} from '@store/index';
+import {calcBasketTotalPriceSum, prepareBasketReqFormat} from '@utils/helpers';
 import {useGetMeQuery, useMakeOrderMutation} from '@store/services/api';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
+import {setBasket} from '@store/slices/basket';
+import AppModal from '@components/AppModal';
 
 function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   const [amountInput, setAmountInput] = useState<string>('0');
   const [payAmount, setPayAmount] = useState<number>(0);
+  const [order, setOrder] = useState(null);
   const basket = useAppSelector(state => state.basket);
   const {basketList} = basket;
+  const dispatch = useAppDispatch();
   const {data: meRes, isSuccess: meResIsSuccess} = useGetMeQuery(null);
-  // const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (route.params?.orderId) {
     } else {
-      let totalPriceSum: number = basketList.reduce(
-        (result: number, current: any) =>
-          result + calcProductTotalPrice(current),
-        0,
-      );
+      let totalPriceSum: number = calcBasketTotalPriceSum(basketList);
 
       setPayAmount(totalPriceSum);
       setAmountInput(totalPriceSum.toString());
@@ -41,9 +47,16 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
       return;
     }
 
-    if (amountInput === '0') {
+    if (amountInput === '0' && char !== '.') {
       setAmountInput(char);
       return;
+    }
+
+    if (amountInput.includes('.')) {
+      const afterDecimalLength = amountInput.split('.')[1].length;
+      if (afterDecimalLength == 2) {
+        return;
+      }
     }
 
     setAmountInput(prev => prev + char);
@@ -51,14 +64,32 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
 
   const [makeOrder, orderResponse] = useMakeOrderMutation();
 
-  function handlePayButton(button: string) {
+  function handlePayButton(buttonVal: string) {
     const reqBasket = prepareBasketReqFormat(basketList);
-    makeOrder({items: reqBasket, discountList: []});
+    if (!order) {
+      makeOrder({items: reqBasket, discountList: []});
+      return;
+    }
+    switch (buttonVal) {
+      case ActionButtons.T05:
+        t05payment();
+        break;
+    }
   }
 
   useEffect(() => {
-    if (orderResponse && orderResponse.isSuccess && meRes && meResIsSuccess) {
-      const {_id} = orderResponse.data.data;
+    if (orderResponse && orderResponse.isSuccess) {
+      setOrder(orderResponse.data.data);
+    }
+  }, [orderResponse]);
+
+  useEffect(() => {
+    t05payment();
+  }, [order]);
+
+  function t05payment() {
+    if (order && meRes && meResIsSuccess) {
+      const {_id} = order;
       if (meRes.outlet.t05.terminalIP) {
         const ws = new WebSocket(`ws://${meRes.outlet.t05.terminalIP}:8888`);
 
@@ -71,20 +102,25 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
           const data = {
             customOrderId: _id,
             customPrintData: 'Rewardly Order',
-            total: payAmount * 100,
+            total: (payAmount * 100).toFixed(2),
           };
           const jsonData = JSON.stringify(data);
           ws.send(jsonData);
         };
         ws.onmessage = event => {
           const message = JSON.parse(event.data);
-          console.log({message});
           if (message) {
             if (message.status === 'Approved') {
               Toast.show({
                 type: 'success',
                 text1: message.status,
               });
+              // const inputValue = parseFloat(amountInput);
+              // const newValue = payAmount - inputValue;
+
+              setAmountInput('0');
+              setPayAmount(0);
+              dispatch(setBasket({basketList: []}));
             } else {
               Toast.show({
                 type: 'error',
@@ -93,15 +129,32 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
             }
           }
         };
+        ws.onerror = error => {
+          if (error) {
+            // console.log({error});
+            // Toast.show({type: 'error', text1: 'Connection error'});
+          }
+        };
       }
     }
-  }, [orderResponse]);
+  }
 
   const changeVal: number = payAmount - parseFloat(amountInput);
   const changeField: string = changeVal < 0 ? (-changeVal).toFixed(2) : '0';
 
+  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
+
   return (
     <View className="bg-bgGray flex-1">
+      <AppModal
+        modalVisible={isPaymentModalVisible}
+        setModalVisible={setIsPaymentModalVisible}>
+        <View className="justify-center h-[300px] items-center flex-1">
+          <AppText className="text-xl font-bold text-[#019C93]">
+            Payment successful
+          </AppText>
+        </View>
+      </AppModal>
       <ScrollView className="px-screenPadding pt-screenTop ">
         <View className="flex-row justify-between items-center">
           <View className="flex-row">
@@ -149,13 +202,13 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mt-4 space-x-4 ">
-          {actionButtons.map((button: string, index: number) => (
+          {actionButtons.map((button: any, index: number) => (
             <TouchableOpacity
-              onPress={() => handlePayButton(button)}
+              onPress={() => handlePayButton(button.value)}
               key={index}
               className="bg-white rounded-xl px-4 py-3">
               <AppText className="font-bold text-textDarkerGray text-[16px]">
-                {button}
+                {button.name}
               </AppText>
             </TouchableOpacity>
           ))}
@@ -186,6 +239,9 @@ const keyboardCharacters = [
 ];
 
 // const actionButtons = ['Card', 'Store credit', 'Point', 'Voucher', 'Cash'];
-const actionButtons = ['Card (T05)'];
+enum ActionButtons {
+  T05 = 't05',
+}
+const actionButtons = [{name: 'Card (T05 pay all', value: ActionButtons.T05}];
 
 export default Payment;

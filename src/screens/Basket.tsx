@@ -1,6 +1,7 @@
 import AppText from '@components/AppText';
 import {useAppDispatch, useAppSelector} from '@store/index';
 import {
+  calcBasketTotalPriceSum,
   calcProductTotalPrice,
   formatToBasket,
   getBundleItemsWithQuantity,
@@ -146,10 +147,22 @@ function BasketItemDetail({item}: any) {
 
 function Footer() {
   const navigation = useMainNavigation();
+  const basket = useAppSelector(state => state.basket);
+  const {basketList} = basket;
+
+  let totalPriceSum: number = calcBasketTotalPriceSum(basketList);
+  let isButtonDisabled = totalPriceSum <= 0;
 
   return (
     <View className="my-6">
-      <AppButton onPress={() => navigation.navigate('Payment')} text="Pay" />
+      <AppButton
+        isDisabled={isButtonDisabled}
+        onPress={() => {
+          if (isButtonDisabled) return;
+          navigation.navigate('Payment');
+        }}
+        text="Pay"
+      />
     </View>
   );
 }
