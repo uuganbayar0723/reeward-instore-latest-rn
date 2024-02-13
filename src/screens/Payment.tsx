@@ -87,6 +87,7 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
     t05payment();
   }, [order]);
 
+
   function t05payment() {
     if (order && meRes && meResIsSuccess) {
       const {_id} = order;
@@ -162,10 +163,10 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
               Pay ${payAmount}
             </AppText>
           </View>
-          <View className="flex-row">
+          {/* <View className="flex-row">
             <TouchableOpacity className="w-8 rounded-full h-8 bg-white"></TouchableOpacity>
             <TouchableOpacity className="w-8 rounded-full h-8 ml-4 bg-white"></TouchableOpacity>
-          </View>
+          </View> */}
         </View>
         <View className="mt-5 flex-row">
           <View className="flex-1">
@@ -242,6 +243,6 @@ const keyboardCharacters = [
 enum ActionButtons {
   T05 = 't05',
 }
-const actionButtons = [{name: 'Card (T05 pay all', value: ActionButtons.T05}];
+const actionButtons = [{name: 'Card (T05)', value: ActionButtons.T05}];
 
 export default Payment;
