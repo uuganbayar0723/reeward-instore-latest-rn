@@ -17,6 +17,9 @@ import {useGetMeQuery, useMakeOrderMutation} from '@store/services/api';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
 import {setBasket} from '@store/slices/basket';
 import AppModal from '@components/AppModal';
+import {StorageKeys, storeGetObj, storeSetObj} from '@utils/asyncStorage';
+import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   const [amountInput, setAmountInput] = useState<string>('0');
@@ -64,12 +67,20 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
 
   const [makeOrder, orderResponse] = useMakeOrderMutation();
 
-  function handlePayButton(buttonVal: string) {
+  async function handlePayButton(buttonVal: string) {
+    let dateNow = moment().format('YYYY-MM-DD');
+    // let res = await storeGetObj(StorageKeys.ORDER_LIST, dateNow);
+    await makeOrderLocal({basketList, discountList: []});
+    const res = await storeGetObj(StorageKeys.ORDER_LIST, dateNow);
+    // const allKeys = await AsyncStorage.getAllKeys();
+    return;
+
     const reqBasket = prepareBasketReqFormat(basketList);
     if (!order) {
-      makeOrder({items: reqBasket, discountList: []});
+      // makeOrder({items: reqBasket, discountList: []});
       return;
     }
+
     switch (buttonVal) {
       case ActionButtons.T05:
         t05payment();
@@ -77,16 +88,15 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
     }
   }
 
-  useEffect(() => {
-    if (orderResponse && orderResponse.isSuccess) {
-      setOrder(orderResponse.data.data);
-    }
-  }, [orderResponse]);
+  // useEffect(() => {
+  //   if (orderResponse && orderResponse.isSuccess) {
+  //     setOrder(orderResponse.data.data);
+  //   }
+  // }, [orderResponse]);
 
   useEffect(() => {
     t05payment();
   }, [order]);
-
 
   function t05payment() {
     if (order && meRes && meResIsSuccess) {
@@ -244,5 +254,41 @@ enum ActionButtons {
   T05 = 't05',
 }
 const actionButtons = [{name: 'Card (T05)', value: ActionButtons.T05}];
+
+async function makeOrderLocal({basketList, discountList}: any) {
+  const timeNow = moment.now();
+  const dateNow = moment().format('YYYY-MM-DD');
+
+  const orderValue = {
+    basketList,
+    discountList,
+    created_at: timeNow,
+    id: timeNow,
+  };
+
+  let orderListIds = [`${StorageKeys.ORDER}-${timeNow}`];
+  const orderListSpecificDay = await storeGetObj(
+    StorageKeys.ORDER_LIST,
+    dateNow,
+  );
+
+  if (orderListSpecificDay) {
+    orderListIds = orderListIds.concat(orderListSpecificDay);
+  }
+
+  await storeSetObj({
+    key: StorageKeys.ORDER_LIST,
+    value: orderListIds,
+    additional: dateNow,
+  });
+
+  await storeSetObj({
+    key: StorageKeys.ORDER,
+    value: orderValue,
+    additional: timeNow,
+  });
+
+  return orderValue;
+}
 
 export default Payment;
