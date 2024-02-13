@@ -66,14 +66,6 @@ export function changeModifierItem({product, modifier, modifierItem}: any) {
   };
 }
 
-export function calcIsModifierMinQuantityReached(modifier_list: any) {
-  const minQuantityNotReachedLength = modifier_list.filter(
-    (m: any) => m.min_quantity > calcModifierTotalQuantity(m),
-  ).length;
-
-  return minQuantityNotReachedLength === 0;
-}
-
 export function changeBundleItem({
   product,
   val,
@@ -103,12 +95,6 @@ export function changeBundleItem({
   };
 }
 
-export function calcBundleItemTotalQuantity(bundleItem: any) {
-  return bundleItem.product_list.reduce((result: number, current: any) => {
-    return result + current.quantity;
-  }, 0);
-}
-
 export function resetModifier({product, modifier}: any) {
   return {
     ...product,
@@ -125,39 +111,69 @@ export function resetModifier({product, modifier}: any) {
   };
 }
 
+export function calcIsModifierMinQuantityReached(modifier_list: any) {
+  const minQuantityNotReachedLength = modifier_list.filter(
+    (m: any) => m.min_quantity > calcModifierTotalQuantity(m),
+  ).length;
+
+  return minQuantityNotReachedLength === 0;
+}
+
+export function calcBundleItemTotalQuantity(bundleItem: any) {
+  let result = bundleItem.product_list.reduce(
+    (result: number, current: any) => {
+      return result + current.quantity;
+    },
+    0,
+  );
+
+  return parseFloat(result.toFixed(2));
+}
+
 export function calcModifierTotalQuantity(modifier: any) {
-  return modifier.modifier_value_list.reduce(
+  let result = modifier.modifier_value_list.reduce(
     (total: number, current: any) => total + current.quantity,
     0,
   );
+
+  return parseFloat(result.toFixed(2));
 }
 
 export function calcModifierTotalPrice(modifier: any) {
-  return modifier.modifier_value_list.reduce(
+  let result = modifier.modifier_value_list.reduce(
     (total: number, current: any) =>
       total + current.quantity * current.price.dine_in,
     0,
   );
+
+  return parseFloat(result.toFixed(2));
 }
 
 function calcModifierQuantitySum(modifier_list: any) {
-  return modifier_list.reduce((result: number, current: any) => {
+  let result = modifier_list.reduce((result: number, current: any) => {
     return result + calcModifierTotalPrice(current);
   }, 0);
+
+  return parseFloat(result.toFixed(2));
 }
 
 function calcBundleProductTotalPrice(bItem: any) {
   const {quantity, price, bProduct} = bItem;
   const {modifier_list} = bProduct;
 
-  return quantity * (price.dine_in + calcModifierQuantitySum(modifier_list));
+  let result =
+    quantity * (price.dine_in + calcModifierQuantitySum(modifier_list));
+
+  return parseFloat(result.toFixed(2));
 }
 
-export function calcBasketTotalPriceSum(basketList:any) {
-  return basketList.reduce(
+export function calcBasketTotalPriceSum(basketList: any) {
+  let result = basketList.reduce(
     (result: number, current: any) => result + calcProductTotalPrice(current),
     0,
   );
+
+  return parseFloat(result.toFixed(2));
 }
 
 export function calcProductTotalPrice(product: any) {
@@ -183,7 +199,9 @@ export function calcProductTotalPrice(product: any) {
     result = result + bundleQuantitySum;
   }
 
-  return result * quantity;
+  result = result * quantity;
+
+  return parseFloat(result.toFixed(2));
 }
 
 export function prepareModifierRequestFormat(modifier_list: any) {
