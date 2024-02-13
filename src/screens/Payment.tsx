@@ -1,6 +1,6 @@
 import AppButton from '@components/AppButton';
 import AppText from '@components/AppText';
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Button,
@@ -24,7 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   const [amountInput, setAmountInput] = useState<string>('0');
   const [payAmount, setPayAmount] = useState<number>(0);
-  const [order, setOrder] = useState(null);
+  // const [order, setOrder] = useState<any>(null);
   const basket = useAppSelector(state => state.basket);
   const {basketList} = basket;
   const dispatch = useAppDispatch();
@@ -65,20 +65,19 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
     setAmountInput(prev => prev + char);
   }
 
-  const [makeOrder, orderResponse] = useMakeOrderMutation();
+  // const [makeOrder, orderResponse] = useMakeOrderMutation();
+  let orderRef = useRef<any>(null);
 
   async function handlePayButton(buttonVal: string) {
-    let dateNow = moment().format('YYYY-MM-DD');
-    // let res = await storeGetObj(StorageKeys.ORDER_LIST, dateNow);
-    await makeOrderLocal({basketList, discountList: []});
-    const res = await storeGetObj(StorageKeys.ORDER_LIST, dateNow);
-    // const allKeys = await AsyncStorage.getAllKeys();
-    return;
+    // const reqBasket = prepareBasketReqFormat(basketList);
 
-    const reqBasket = prepareBasketReqFormat(basketList);
-    if (!order) {
-      // makeOrder({items: reqBasket, discountList: []});
-      return;
+    if (!orderRef.current) {
+      const newOrder = await makeOrderLocal({
+        basketList,
+        payAmount,
+        discountList: [],
+      });
+      orderRef.current = newOrder;
     }
 
     switch (buttonVal) {
@@ -94,15 +93,15 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
   //   }
   // }, [orderResponse]);
 
-  useEffect(() => {
-    t05payment();
-  }, [order]);
+  // useEffect(() => {
+  //   t05payment();
+  // }, [order]);
 
   function t05payment() {
-    if (order && meRes && meResIsSuccess) {
-      const {_id} = order;
+    if (orderRef.current && meRes && meResIsSuccess) {
       if (meRes.outlet.t05.terminalIP) {
         const ws = new WebSocket(`ws://${meRes.outlet.t05.terminalIP}:8888`);
+        const paymentId = moment.now();
 
         Toast.show({
           type: 'info',
@@ -111,38 +110,64 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
 
         ws.onopen = () => {
           const data = {
-            customOrderId: _id,
+            customOrderId: paymentId,
             customPrintData: 'Rewardly Order',
-            total: (payAmount * 100).toFixed(2),
+            total: (parseFloat(amountInput) * 100).toFixed(2),
           };
           const jsonData = JSON.stringify(data);
           ws.send(jsonData);
         };
-        ws.onmessage = event => {
+        ws.onmessage = async event => {
           const message = JSON.parse(event.data);
-          if (message) {
-            if (message.status === 'Approved') {
-              Toast.show({
-                type: 'success',
-                text1: message.status,
-              });
-              // const inputValue = parseFloat(amountInput);
-              // const newValue = payAmount - inputValue;
 
-              setAmountInput('0');
-              setPayAmount(0);
-              dispatch(setBasket({basketList: []}));
-            } else {
-              Toast.show({
-                type: 'error',
-                text1: message.status,
-              });
-            }
+          if (message && message.status === 'Approved') {
+            const {amountInCents, date, customOrderId} = message;
+            const displayVal = (amountInCents / 100).toFixed(2);
+            Toast.show({
+              type: 'success',
+              text1: `$${displayVal} paid`,
+            });
+
+            const {payments, id: orderId} = orderRef.current;
+            const paidAmount = parseFloat((amountInCents / 100).toFixed(2));
+
+            orderRef.current = {
+              ...orderRef.current,
+              payments: [
+                ...payments,
+                {
+                  date,
+                  amount: paidAmount,
+                  type: 'Card T05',
+                  id: customOrderId,
+                },
+              ],
+            };
+
+            await storeSetObj({
+              key: StorageKeys.ORDER,
+              value: orderRef.current,
+              additional: orderId,
+            });
+            const orderStorage = await storeGetObj(StorageKeys.ORDER, orderId);
+
+            setPayAmount(prev => prev - paidAmount);
+            dispatch(setBasket({basketList: []}));
+
+            // const inputValue = parseFloat(amountInput);
+            // const newValue = payAmount - inputValue;
+
+            // setAmountInput('0');
+            // setPayAmount(0);
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: message.status,
+            });
           }
         };
         ws.onerror = error => {
           if (error) {
-            // console.log({error});
             // Toast.show({type: 'error', text1: 'Connection error'});
           }
         };
@@ -255,7 +280,7 @@ enum ActionButtons {
 }
 const actionButtons = [{name: 'Card (T05)', value: ActionButtons.T05}];
 
-async function makeOrderLocal({basketList, discountList}: any) {
+async function makeOrderLocal({basketList, payAmount, discountList}: any) {
   const timeNow = moment.now();
   const dateNow = moment().format('YYYY-MM-DD');
 
@@ -263,6 +288,8 @@ async function makeOrderLocal({basketList, discountList}: any) {
     basketList,
     discountList,
     created_at: timeNow,
+    payments: [],
+    payAmount,
     id: timeNow,
   };
 
