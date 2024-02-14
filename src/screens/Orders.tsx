@@ -4,6 +4,7 @@ import {useMainNavigation} from '@navigators/MainNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useGetOrdersQuery} from '@store/services/api';
 import {StorageKeys, storeGetMultiple} from '@utils/asyncStorage';
+import { calSumPayments } from '@utils/helpers';
 import moment from 'moment';
 import React, {useEffect, useState} from 'react';
 import {View, Button, Text, FlatList, TouchableOpacity} from 'react-native';
@@ -76,9 +77,8 @@ function Orders(): React.JSX.Element {
                   ${order.payAmount}
                 </AppText>
                 <AppText className="font-medium text-green-400 text-lg">
-                  /${order.payments ? sumPayments(order.payments) : 0}
+                  /${order.payments ? calSumPayments(order.payments) : 0}
                 </AppText>
-                {/* <AppText className="ml-2">{order}</AppText> */}
               </View>
             </View>
           </TouchableOpacity>
@@ -88,11 +88,5 @@ function Orders(): React.JSX.Element {
   );
 }
 
-function sumPayments(payments: any) {
-  return payments.reduce(
-    (result: number, current: any) => current.amount + result,
-    0,
-  );
-}
 
 export default Orders;

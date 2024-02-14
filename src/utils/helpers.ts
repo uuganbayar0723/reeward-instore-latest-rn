@@ -236,3 +236,10 @@ export function prepareBasketReqFormat(basketList: any) {
     })),
   }));
 }
+
+export function calSumPayments(payments: any) {
+  return payments.reduce(
+    (result: number, current: any) => current.amount + result,
+    0,
+  );
+}
