@@ -37,6 +37,14 @@ function Orders(): React.JSX.Element {
 
   const navigation = useMainNavigation();
 
+  if (orderList.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <AppText className="text-xl font-bold">No local orders</AppText>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 ">
       <FlatList

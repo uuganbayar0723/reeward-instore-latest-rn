@@ -5,6 +5,7 @@ import {formatToBasket} from '@utils/helpers';
 import moment from 'moment';
 import React, {memo, useEffect, useState} from 'react';
 import {FlatList, View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 function OrderDetail({
   route,
@@ -24,6 +25,7 @@ function OrderDetail({
   if (order === null) {
     return <View></View>;
   }
+
 
   return (
     <View className="flex-1 pt-screenTop px-screenPadding">
@@ -47,9 +49,8 @@ function OrderDetail({
 
 function BasketList({basketList}: any) {
   return (
-    <View>
+    <View className='mt-2'>
       <FlatList
-        className="px-screenPadding"
         data={basketList}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
@@ -58,7 +59,7 @@ function BasketList({basketList}: any) {
           <BasketItem key={index} product={product} />
         )}
         ItemSeparatorComponent={() => (
-          <View className="h-[2px] bg-bgGray my-5"></View>
+          <View className="h-[1px] bg-bgGray my-2"></View>
         )}
       />
     </View>
@@ -68,33 +69,42 @@ function BasketList({basketList}: any) {
 const BasketItem = memo(
   ({product}: any) => {
     let subList = formatToBasket(product);
-    // subList = [{}]
 
     return (
-      <View className="flex">
-        <View className="pl-4">
-          <FlatList
-            className="mt-4"
-            data={subList}
-            initialNumToRender={1}
-            maxToRenderPerBatch={1}
-            ItemSeparatorComponent={() => <View className="h-2"></View>}
-            renderItem={({item}) => (
-              <>
-                <BasketItemDetail item={item} />
-                {item.subItems.length ? (
-                  <View className="pl-6">
-                    {item.subItems.map((subItem: any, index: number) => (
-                      <BasketItemDetail key={index} item={subItem} />
-                    ))}
-                  </View>
-                ) : (
-                  <></>
-                )}
-              </>
-            )}
+      <View className="flex mt-4">
+        {/* <BasketItemDetail key={index} /> */}
+        <View className="flex-row items-center">
+          <FastImage
+            style={{borderWidth: 2, borderColor: 'white'}}
+            className="w-12 h-12 bg-gray-100 shadow-md  rounded-full"
+            source={{uri: product.image_url}}
           />
+          <View className="ml-2">
+            <AppText className="font-bold ">{product.name}</AppText>
+            <AppText className="font-bold">$ {product.price.dine_in}</AppText>
+          </View>
         </View>
+        <FlatList
+          className="mt-4"
+          data={subList}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          ItemSeparatorComponent={() => <View className="h-2"></View>}
+          renderItem={({item}) => (
+            <>
+              <BasketItemDetail item={item} />
+              {item.subItems.length ? (
+                <View className="pl-6">
+                  {item.subItems.map((subItem: any, index: number) => (
+                    <BasketItemDetail key={index} item={subItem} />
+                  ))}
+                </View>
+              ) : (
+                <></>
+              )}
+            </>
+          )}
+        />
       </View>
     );
   },
@@ -106,7 +116,9 @@ function BasketItemDetail({item}: any) {
     <View className="flex-row justify-between ">
       <View className="flex-row">
         <AppText className="w-4">{item.quantity}</AppText>
-        <AppText>{item.name}</AppText>
+        <AppText className={`${item.isBold && 'font-medium'}`}>
+          {item.name}
+        </AppText>
       </View>
       <AppText>$ {item.price}</AppText>
     </View>
