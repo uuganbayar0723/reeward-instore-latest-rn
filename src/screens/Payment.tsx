@@ -10,7 +10,10 @@ import {
   Modal,
 } from 'react-native';
 import {useState} from 'react';
-import {RootStackScreenProps} from '@navigators/MainNavigator';
+import {
+  RootStackScreenProps,
+  useMainNavigation,
+} from '@navigators/MainNavigator';
 import {useAppDispatch, useAppSelector} from '@store/index';
 import {calcBasketTotalPriceSum, prepareBasketReqFormat} from '@utils/helpers';
 import {useGetMeQuery, useMakeOrderMutation} from '@store/services/api';
@@ -18,7 +21,7 @@ import {Toast} from 'react-native-toast-message/lib/src/Toast';
 import {setBasket} from '@store/slices/basket';
 import AppModal from '@components/AppModal';
 import {StorageKeys, storeGetObj, storeSetObj} from '@utils/asyncStorage';
-import moment from 'moment';
+import moment, {parseTwoDigitYear} from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
@@ -87,16 +90,6 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
     }
   }
 
-  // useEffect(() => {
-  //   if (orderResponse && orderResponse.isSuccess) {
-  //     setOrder(orderResponse.data.data);
-  //   }
-  // }, [orderResponse]);
-
-  // useEffect(() => {
-  //   t05payment();
-  // }, [order]);
-
   function t05payment() {
     if (orderRef.current && meRes && meResIsSuccess) {
       if (meRes.outlet.t05.terminalIP) {
@@ -144,21 +137,26 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
               ],
             };
 
-            await storeSetObj({
+            storeSetObj({
               key: StorageKeys.ORDER,
               value: orderRef.current,
               additional: orderId,
             });
-            const orderStorage = await storeGetObj(StorageKeys.ORDER, orderId);
+            // const orderStorage = await storeGetObj(StorageKeys.ORDER, orderId);
+            // console.log(orderStorage);
 
-            setPayAmount(prev => prev - paidAmount);
+            const newPayVal =
+              payAmount > paidAmount
+                ? parseFloat((payAmount - paidAmount).toFixed(2))
+                : 0;
+
+            setPayAmount(newPayVal);
+            setAmountInput(newPayVal.toString());
             dispatch(setBasket({basketList: []}));
 
-            // const inputValue = parseFloat(amountInput);
-            // const newValue = payAmount - inputValue;
-
-            // setAmountInput('0');
-            // setPayAmount(0);
+            if (newPayVal === 0) {
+              setIsPaymentModalVisible(true);
+            }
           } else {
             Toast.show({
               type: 'error',
@@ -167,8 +165,8 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
           }
         };
         ws.onerror = error => {
-          if (error) {
-            // Toast.show({type: 'error', text1: 'Connection error'});
+          if (error && error.message) {
+            Toast.show({type: 'error', text1: error.message});
           }
         };
       }
@@ -180,6 +178,8 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
 
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
 
+  const navigation = useMainNavigation();
+
   return (
     <View className="bg-bgGray flex-1">
       <AppModal
@@ -187,8 +187,11 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
         setModalVisible={setIsPaymentModalVisible}>
         <View className="justify-center h-[300px] items-center flex-1">
           <AppText className="text-xl font-bold text-[#019C93]">
-            Payment successful
+            Payment successful!
           </AppText>
+        </View>
+        <View className="w-full">
+          <AppButton text="Ok" onPress={() => navigation.navigate('MainTab')} />
         </View>
       </AppModal>
       <ScrollView className="px-screenPadding pt-screenTop ">
