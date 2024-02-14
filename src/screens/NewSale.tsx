@@ -154,7 +154,7 @@ const Product = memo(
                 transform: [{translateX: -(IMAGE_SIZE / 2)}],
                 borderWidth: 4,
               }}
-              className="rounded-full absolute z-20 left-1/2  border-white ">
+              className="rounded-full absolute z-20 left-1/2 bg-bgGray  border-white ">
               <FastImage
                 style={{
                   width: IMAGE_SIZE,

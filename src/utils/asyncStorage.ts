@@ -78,3 +78,15 @@ export const storeRemoveItem = async (key: StorageKeys) => {
     await AsyncStorage.removeItem(key);
   } catch (e) {}
 };
+
+export async function storeGetMultiple(keys: string[]) {
+  try {
+    let values = await AsyncStorage.multiGet(keys);
+    let result = [];
+    if (values) {
+      result = values.map((val: any) => JSON.parse(val[1]));
+    }
+
+    return result;
+  } catch (e) {}
+}
