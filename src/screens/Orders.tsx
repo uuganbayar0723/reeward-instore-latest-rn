@@ -2,9 +2,10 @@ import AppText from '@components/AppText';
 import colors from '@constants/colors';
 import {useMainNavigation} from '@navigators/MainNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect, useIsFocused} from '@react-navigation/native';
 import {useGetOrdersQuery} from '@store/services/api';
 import {StorageKeys, storeGetMultiple} from '@utils/asyncStorage';
-import { calSumPayments } from '@utils/helpers';
+import {calSumPayments} from '@utils/helpers';
 import moment from 'moment';
 import React, {useEffect, useState} from 'react';
 import {View, Button, Text, FlatList, TouchableOpacity} from 'react-native';
@@ -32,9 +33,14 @@ function Orders(): React.JSX.Element {
     const lastOrderKeys = lastOrderIds.map(id => `${StorageKeys.ORDER}-${id}`);
 
     const lastOrders = (await storeGetMultiple(lastOrderKeys))?.reverse();
-
     setOrderList(lastOrders);
   }
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    getStorageOrders()
+  }, [isFocused]);
 
   const navigation = useMainNavigation();
 
@@ -87,6 +93,5 @@ function Orders(): React.JSX.Element {
     </View>
   );
 }
-
 
 export default Orders;
