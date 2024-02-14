@@ -18,7 +18,7 @@ import {useAppDispatch, useAppSelector} from '@store/index';
 import {calcBasketTotalPriceSum, prepareBasketReqFormat} from '@utils/helpers';
 import {useGetMeQuery, useMakeOrderMutation} from '@store/services/api';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
-import {setBasket} from '@store/slices/basket';
+import {clearBasket, setBasket} from '@store/slices/basket';
 import AppModal from '@components/AppModal';
 import {StorageKeys, storeGetObj, storeSetObj} from '@utils/asyncStorage';
 import moment, {parseTwoDigitYear} from 'moment';
@@ -81,6 +81,7 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
         discountList: [],
       });
       orderRef.current = newOrder;
+      dispatch(clearBasket());
     }
 
     switch (buttonVal) {
@@ -152,7 +153,6 @@ function Payment({route}: RootStackScreenProps<'Payment'>): React.JSX.Element {
 
             setPayAmount(newPayVal);
             setAmountInput(newPayVal.toString());
-            dispatch(setBasket({basketList: []}));
 
             if (newPayVal === 0) {
               setIsPaymentModalVisible(true);

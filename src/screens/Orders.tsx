@@ -1,5 +1,6 @@
 import AppText from '@components/AppText';
 import colors from '@constants/colors';
+import {useMainNavigation} from '@navigators/MainNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useGetOrdersQuery} from '@store/services/api';
 import {StorageKeys, storeGetMultiple} from '@utils/asyncStorage';
@@ -9,7 +10,6 @@ import {View, Button, Text, FlatList, TouchableOpacity} from 'react-native';
 
 function Orders(): React.JSX.Element {
   // let {data, isLoading, isSuccess} = useGetOrdersQuery(null);
-  // console.log(data);
   const [orderList, setOrderList] = useState<any>([]);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ function Orders(): React.JSX.Element {
     setOrderList(lastOrders);
   }
 
-  console.log(orderList);
+  const navigation = useMainNavigation();
 
   return (
     <View className="flex-1 ">
@@ -49,8 +49,11 @@ function Orders(): React.JSX.Element {
         renderItem={({item: order}) => (
           <TouchableOpacity
             activeOpacity={0.8}
+            onPress={() =>
+              navigation.navigate('OrderDetail', {orderId: order.id})
+            }
             className="p-3 bg-white shadow-md rounded-lg">
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between items-center">
               <View className="">
                 <View className="flex-row items-center">
                   <AppText className="font-medium text-lg">Order</AppText>

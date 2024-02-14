@@ -10,9 +10,11 @@ import {useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import CloseIcon from '@assets/icons/close.png';
 import Payment from '@screens/Payment';
+import OrderDetail from '@screens/OrderDetail';
 
 export type MainStackParamList = {
   MainTab: undefined;
+  OrderDetail: {orderId: string};
   ProductDetail: {id: string};
   Payment: undefined | {orderId: string};
   Basket: undefined;
@@ -66,6 +68,14 @@ export default function MainNavigator() {
         }}
         name="Basket"
         component={Basket}
+      />
+      <MainStack.Screen
+        options={{
+          title: 'OrderDetail',
+          headerShown: false,
+        }}
+        name="OrderDetail"
+        component={OrderDetail}
       />
     </MainStack.Navigator>
   );
